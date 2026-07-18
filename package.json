@@ -1,0 +1,20 @@
+{
+  "name": "devquiz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DevQuiz — gamified Persian technical-interview flashcards (Chrome MV3 extension)",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/popup.ts src/onboarding.ts src/background.ts --bundle --format=esm --target=es2022 --outdir=dist --minify",
+    "watch": "esbuild src/popup.ts src/onboarding.ts src/background.ts --bundle --format=esm --target=es2022 --outdir=dist --watch",
+    "build:tsc": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.278",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "DevQuiz — تمرین سوالات مصاحبه",
+  "description": "تمرین گیمیفای‌شده سوالات مصاحبه فنی به زبان فارسی، با فلش‌کارت، استریک و XP.",
+  "version": "1.0.0",
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "DevQuiz"
+  },
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "host_permissions": ["https://gist.githubusercontent.com/*"],
+  "permissions": ["storage", "alarms", "unlimitedStorage"]
+}
