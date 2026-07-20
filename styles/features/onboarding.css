@@ -1,0 +1,113 @@
+/* ============================================================
+ * DevQuiz — features/onboarding.css
+ * First-run full-tab onboarding page (.ob-*). Used only by
+ * pages/onboarding.html.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Onboarding page (full tab)
+ * ------------------------------------------------------------ */
+.ob-body {
+  min-height: 100vh;
+}
+.ob {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.ob-hero {
+  text-align: center;
+  padding: 20px 0 6px;
+}
+.ob-hero__logo {
+  font-size: var(--fs-52);
+  filter: drop-shadow(0 0 22px rgba(124, 92, 255, 0.9));
+}
+.ob-hero__title {
+  margin: 10px 0 6px;
+  font-size: var(--fs-26);
+}
+.ob-hero__sub {
+  margin: 0 auto;
+  max-width: 420px;
+  color: var(--text-dim);
+  font-size: var(--fs-14_5);
+}
+.ob-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 14px;
+}
+.ob-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+}
+.ob-card__title {
+  margin: 0;
+  font-size: var(--fs-16);
+}
+.ob-card__desc {
+  margin: 0;
+  flex: 1 1 auto;
+  color: var(--text-dim);
+  font-size: var(--fs-13);
+}
+.ob-card__ver {
+  color: var(--text-faint);
+  font-size: var(--fs-11_5);
+}
+.ob-card__status {
+  color: var(--danger);
+  font-size: var(--fs-12);
+  min-height: 0;
+}
+.ob-card__status:empty {
+  display: none;
+}
+.ob-footer {
+  position: sticky;
+  bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+.ob-footer .btn {
+  max-width: 360px;
+}
+.ob-finish {
+  text-align: center;
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.ob-finish__emoji {
+  font-size: var(--fs-60);
+}
+.ob-card__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ob-card__icon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-22);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  flex: 0 0 auto;
+}
+.ob-card__icon--img {
+  object-fit: contain;
+  padding: 4px;
+  filter: drop-shadow(0 0 4px rgba(124, 92, 255, 0.25));
+}

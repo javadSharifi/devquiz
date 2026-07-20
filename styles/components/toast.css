@@ -1,0 +1,58 @@
+/* ============================================================
+ * DevQuiz — components/toast.css
+ * Single-instance snackbar with optional action button.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Toast / snackbar
+ * ------------------------------------------------------------ */
+.toast {
+  position: fixed;
+  z-index: 70;
+  bottom: calc(var(--nav-h) + 12px);
+  right: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: var(--toast-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-13);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--ease), transform var(--ease);
+}
+.toast--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast--success {
+  border-color: rgba(61, 220, 132, 0.4);
+}
+.toast--error {
+  border-color: rgba(255, 93, 122, 0.5);
+}
+.toast__action {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  color: var(--accent-strong);
+  font-family: inherit;
+  font-size: var(--fs-13);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  transition: all var(--ease);
+}
+.toast__action:hover {
+  background: rgba(124, 92, 255, 0.14);
+}
+.toast__action:active {
+  transform: scale(0.96);
+}

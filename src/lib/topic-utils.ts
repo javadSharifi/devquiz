@@ -11,10 +11,22 @@ export function isEligibleForQueue(userStates: Record<string, UserQuestionState>
   return s === 'unseen' || s === 'skip';
 }
 
+let _lastDataRevision = -1;
+let _lastTopicId = '';
+let _lastResult: Topic | null = null;
+
 export function getMergedTopic(topicId: string): Topic | null {
-  const { topics, customQuestions } = store.getState();
+  const { topics, customQuestions, dataRevision } = store.getState();
+  if (_lastDataRevision === dataRevision && _lastTopicId === topicId) {
+    return _lastResult;
+  }
   const base = topics[topicId];
-  if (!base) return null;
+  if (!base) {
+    _lastDataRevision = dataRevision;
+    _lastTopicId = topicId;
+    _lastResult = null;
+    return null;
+  }
   const merged: Topic = {
     meta: { ...base.meta },
     categories: base.categories.map((c: Category) => ({ ...c, questions: [...c.questions] })),
@@ -34,6 +46,9 @@ export function getMergedTopic(topicId: string): Topic | null {
     }
     cat.questions.push({ ...cq });
   }
+  _lastDataRevision = dataRevision;
+  _lastTopicId = topicId;
+  _lastResult = merged;
   return merged;
 }
 

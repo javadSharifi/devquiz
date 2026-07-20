@@ -1,0 +1,67 @@
+/* ============================================================
+ * DevQuiz — layout/header.css
+ * App header (brand) + stat chips. stat-pulse keyframe lives
+ * here next to .stat--pulse.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Header
+ * ------------------------------------------------------------ */
+.app-header {
+  height: var(--header-h);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: var(--fs-15);
+  letter-spacing: 0.2px;
+}
+.brand__logo {
+  filter: drop-shadow(0 0 6px rgba(124, 92, 255, 0.8));
+}
+
+.header-stats {
+  display: flex;
+  gap: 8px;
+}
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  font-size: var(--fs-12_5);
+  font-weight: 700;
+  transition: box-shadow var(--ease);
+}
+.stat--streak .stat__icon {
+  filter: drop-shadow(0 0 5px rgba(255, 140, 60, 0.9));
+}
+.stat--xp {
+  color: var(--accent-strong);
+}
+.stat__unit {
+  font-size: var(--fs-10);
+  color: var(--text-faint);
+}
+.stat--pulse {
+  animation: stat-pulse 0.5s ease;
+}
+@keyframes stat-pulse {
+  40% {
+    transform: scale(1.12);
+    box-shadow: var(--glow-accent);
+  }
+}

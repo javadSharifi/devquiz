@@ -182,7 +182,6 @@ export function undoLastAnswer(): void {
   });
 
   if (u.wasRandom) {
-    const qid = u.key.split(':').slice(1).join(':');
     store.dispatch({
       type: 'RESTORE',
       snapshot: { sessionXp: u.prevSessionXp, sessionAnswered: u.prevSessionAnswered },

@@ -1,20 +1,14 @@
 import { buildFlashcard } from '../components/flashcard.js';
 import { store } from '../state.js';
-import { getMergedTopic, levelStats, categoryStats, buildQueue } from '../lib/topic-utils.js';
+import { getMergedTopic, categoryStats } from '../lib/topic-utils.js';
 import { answerCurrentCard, XP_PER_STATE, setLastFlashcard } from '../lib/undo.js';
-import { backButton, LEVEL_LABEL, statChip, topicIconEl } from '../lib/helpers.js';
+import { backButton, statChip, topicIconEl } from '../lib/helpers.js';
 import { viewport, patchViewport } from '../lib/dom-patch.js';
-import type { QuestionLevel, QuestionState, Topic } from '../types.js';
+import { renderCategoryList } from './game/cat-list.js';
+import type { Topic } from '../types.js';
 import type { AppState } from '../state.js';
-import { renderMarkdown } from '../markdown.js';
-import { faNum, stateKey } from '../types.js';
-import { button, confetti, emptyState, errorCard, h, progressBar, progressRing } from '../ui.js';
-
-const LEVEL_COLOR: Record<QuestionLevel, string> = {
-  junior: 'var(--junior)',
-  mid: 'var(--mid)',
-  senior: 'var(--senior)',
-};
+import { faNum } from '../types.js';
+import { button, confetti, emptyState, errorCard, h, progressBar } from '../ui.js';
 
 export function renderGame(state: AppState): HTMLElement {
   const topic = getMergedTopic(state.activeTopicId);
@@ -29,18 +23,17 @@ export function renderGame(state: AppState): HTMLElement {
     return wrap;
   }
 
-  if (state.selectedLevel === null) {
-    const wrap = renderLevelSelect(state, topic);
+  if (state.selectedCategoryId === null) {
+    const wrap = renderAllCategories(state, topic);
     const switcher = renderTopicSwitcher(state);
     if (switcher) wrap.prepend(switcher);
     return wrap;
   }
-  if (state.selectedCategoryId === null) return renderCategoryGrid(state, topic, state.selectedLevel);
   const finishedSession = state.queue.length === 0 && state.sessionAnswered > 0;
   if (state.currentQuestionIndex < state.queue.length || finishedSession) {
-    return renderFlashcardScreen(state, topic, state.selectedLevel, state.selectedCategoryId);
+    return renderFlashcardScreen(state, topic, state.selectedCategoryId);
   }
-  return renderCategoryList(state, topic, state.selectedLevel, state.selectedCategoryId);
+  return renderCategoryList(state, topic, state.selectedCategoryId);
 }
 
 function renderTopicSwitcher(state: AppState): HTMLElement | null {
@@ -71,52 +64,22 @@ function renderTopicSwitcher(state: AppState): HTMLElement | null {
   return h('div', { className: 'topic-switcher-wrap' }, row);
 }
 
-function renderLevelSelect(state: AppState, topic: Topic): HTMLElement {
-  const wrap = h('div', { className: 'view view--levels' });
-  wrap.appendChild(h('h2', { className: 'view__title' }, topic.meta.title || 'انتخاب سطح'));
-  wrap.appendChild(h('p', { className: 'view__sub' }, 'سطح خودت رو انتخاب کن'));
-  const levels: QuestionLevel[] = ['junior', 'mid', 'senior'];
-  for (const level of levels) {
-    const { done, total } = levelStats(topic, state.activeTopicId, level, state.userStates);
-    const card = h(
-      'button',
-      {
-        className: `level-card level-card--${level}`,
-        type: 'button',
-        attrs: { 'aria-label': `سطح ${LEVEL_LABEL[level]}، ${faNum(done)} از ${faNum(total)} پاسخ داده شده` },
-        onClick: () => store.dispatch({ type: 'SELECT_LEVEL', level }),
-        disabled: total === 0,
-      },
-      h(
-        'div',
-        { className: 'level-card__info' },
-        h('span', { className: 'level-card__name' }, LEVEL_LABEL[level]),
-        h('span', { className: 'level-card__meta' }, total === 0 ? 'سوالی موجود نیست' : `${faNum(total)} سؤال`),
-      ),
-      progressRing(done, total, LEVEL_COLOR[level]),
-    );
-    wrap.appendChild(card);
-  }
-  return wrap;
-}
-
-function renderCategoryGrid(state: AppState, topic: Topic, level: QuestionLevel): HTMLElement {
+function renderAllCategories(state: AppState, topic: Topic): HTMLElement {
   const wrap = h('div', { className: 'view view--categories' });
   wrap.appendChild(
     h(
       'div',
       { className: 'view-head' },
-      backButton(() => store.dispatch({ type: 'SELECT_LEVEL', level: null })),
-      h('h2', { className: 'view__title' }, `دسته‌بندی‌ها · ${LEVEL_LABEL[level]}`),
+      backButton(() => store.dispatch({ type: 'SET_TAB', tab: 'all-games' })),
+      h('h2', { className: 'view__title' }, 'دسته‌بندی‌ها'),
     ),
   );
   const grid = h('div', { className: 'cat-grid' });
-  const cats = topic.categories.filter((c) => c.level === level);
-  if (cats.length === 0) {
-    wrap.appendChild(emptyState('🗂️', 'دسته‌ای پیدا نشد', 'برای این سطح هنوز سوالی ثبت نشده است.'));
+  if (topic.categories.length === 0) {
+    wrap.appendChild(emptyState('🗂️', 'دسته‌ای پیدا نشد', 'هنوز سوالی ثبت نشده است.'));
     return wrap;
   }
-  for (const cat of cats) {
+  for (const cat of topic.categories) {
     const { done, total } = categoryStats(cat, state.activeTopicId, state.userStates);
     const card = h(
       'button',
@@ -139,131 +102,9 @@ function renderCategoryGrid(state: AppState, topic: Topic, level: QuestionLevel)
   return wrap;
 }
 
-const STATE_COLORS: Record<QuestionState, string> = {
-  know: 'var(--junior)',
-  want_to_learn: 'var(--mid)',
-  skip: 'var(--danger)',
-  unseen: 'var(--danger)',
-};
-
-function renderCategoryList(state: AppState, topic: Topic, level: QuestionLevel, categoryId: string): HTMLElement {
-  const wrap = h('div', { className: 'view view--cat-list' });
-  const cat = topic.categories.find((c) => c.id === categoryId);
-  if (!cat) return emptyState('🗂️', 'دسته پیدا نشد', '');
-
-  const { done, total } = categoryStats(cat, state.activeTopicId, state.userStates);
-
-  wrap.appendChild(
-    h('div', { className: 'view-head' },
-      backButton(() => store.dispatch({ type: 'SELECT_CATEGORY', categoryId: null, queue: [] })),
-      h('h2', { className: 'view__title view__title--sm' }, `${cat.icon} ${cat.title}`),
-    ),
-  );
-  wrap.appendChild(progressBar(done, total));
-  wrap.appendChild(h('p', { className: 'cat-list__count' }, `${faNum(done)} از ${faNum(total)} پاسخ`));
-
-  const nonKnowIds = cat.questions
-    .filter((q) => {
-      const s = state.userStates[stateKey(state.activeTopicId, q.id)]?.state ?? 'unseen';
-      return s !== 'know';
-    })
-    .map((q) => q.id);
-  const allIds = cat.questions.map((q) => q.id);
-
-  wrap.appendChild(
-    h('div', { className: 'cat-list__actions' },
-      nonKnowIds.length > 0
-        ? button('▶ ادامه یادگیری', () => {
-            store.dispatch({ type: 'SET_QUEUE', queue: nonKnowIds, index: 0 });
-          }, { variant: 'primary', className: 'btn--wide btn--big' })
-        : h('p', { className: 'cat-list__all-done' }, '✅ همه رو بلدی!'),
-      button('مرور همه', () => {
-        store.dispatch({ type: 'SET_QUEUE', queue: allIds, index: 0 });
-      }, { variant: 'ghost', className: 'btn--wide' }),
-    ),
-  );
-
-  if (total === 0) {
-    wrap.appendChild(emptyState('📭', 'سوالی نیست', 'این دسته خالیه'));
-    return wrap;
-  }
-
-  const list = h('div', { className: 'cat-list' });
-  for (const q of cat.questions) {
-    const currentState = state.userStates[stateKey(state.activeTopicId, q.id)]?.state ?? 'unseen';
-    const color = STATE_COLORS[currentState] ?? 'var(--danger)';
-    const isDone = currentState === 'know';
-    const body = h('div', { className: 'cat-list__body', attrs: { hidden: '' } });
-    function setQState(newState: QuestionState): void {
-      const key = stateKey(state.activeTopicId, q.id);
-      store.dispatch({ type: 'SET_USER_STATE', key, value: { state: newState, updatedAt: Date.now() } });
-      const itemEl = toggle.closest('.cat-list__item') as HTMLElement;
-      if (itemEl) {
-        const c = STATE_COLORS[newState];
-        itemEl.style.borderInlineStartColor = c;
-        itemEl.classList.toggle('cat-list__item--done', newState === 'know');
-        toggle.classList.toggle('cat-list__head--done', newState === 'know');
-        body.setAttribute('hidden', '');
-        toggle.setAttribute('aria-expanded', 'false');
-      }
-      const s = store.getState();
-      const pct = cat!.questions.filter((x) => {
-        const st = s.userStates[stateKey(s.activeTopicId, x.id)]?.state ?? 'unseen';
-        return st === 'know' || st === 'want_to_learn';
-      }).length;
-      const totalStr = `${faNum(pct)} از ${faNum(total)} پاسخ`;
-      const countEl = wrap.querySelector('.cat-list__count');
-      if (countEl) countEl.textContent = totalStr;
-      const bar = wrap.querySelector('.progress__fill') as HTMLElement;
-      if (bar) bar.style.width = `${total > 0 ? Math.round((pct / total) * 100) : 0}%`;
-    }
-    const toggle = h(
-      'button',
-      {
-        className: `cat-list__head${isDone ? ' cat-list__head--done' : ''}`,
-        type: 'button',
-        attrs: { 'aria-expanded': 'false' },
-        onClick: () => {
-          const hidden = body.hasAttribute('hidden');
-          if (hidden) {
-            body.replaceChildren();
-            body.appendChild(renderCardAnswer(q.answer));
-            body.appendChild(
-              h('div', { className: 'cat-list__actions-inline' },
-                button('✅ بلدم', () => setQState('know'), { variant: 'soft', className: 'act act--know', ariaLabel: 'بلدم' }),
-                button('📚 یاد می‌گیرم', () => setQState('want_to_learn'), { variant: 'soft', className: 'act act--learn', ariaLabel: 'یاد می‌گیرم' }),
-                button('⏭ رد کن', () => setQState('skip'), { variant: 'soft', className: 'act act--skip', ariaLabel: 'رد کن' }),
-              ),
-            );
-          }
-          if (hidden) body.removeAttribute('hidden');
-          else body.setAttribute('hidden', '');
-          toggle.setAttribute('aria-expanded', String(!hidden));
-          toggle.parentElement?.classList.toggle('cat-list__item--open', !hidden);
-        },
-      },
-      h('span', { className: 'cat-list__q' }, q.question),
-    );
-    const item = h('div', {
-      className: `cat-list__item${isDone ? ' cat-list__item--done' : ''}`,
-      style: { borderInlineStart: `3px solid ${color}` },
-    }, toggle, body);
-    list.appendChild(item);
-  }
-  wrap.appendChild(list);
-  return wrap;
-}
-
-function renderCardAnswer(answer: string): HTMLElement {
-  const req = document.createElement('div');
-  req.appendChild(renderMarkdown(answer));
-  return req;
-}
-
 function renderFlashcardScreen(
   state: AppState,
   topic: Topic,
-  level: QuestionLevel,
   categoryId: string,
 ): HTMLElement {
   const wrap = h('div', { className: 'view view--card' });
@@ -278,16 +119,16 @@ function renderFlashcardScreen(
   );
 
   if (state.queue.length === 0) {
-    wrap.appendChild(renderCelebration(state, topic, level, categoryId));
+    wrap.appendChild(renderCelebration(state, topic, categoryId));
     return wrap;
   }
 
-  const content = buildCardContent(state, level);
+  const content = buildCardContent(state);
   if (content) wrap.appendChild(content);
   return wrap;
 }
 
-function buildCardContent(state: AppState, level: QuestionLevel): HTMLElement | null {
+function buildCardContent(state: AppState): HTMLElement | null {
   if (state.queue.length === 0) return null;
   const idx = Math.min(state.currentQuestionIndex, state.queue.length - 1);
   const questionId = state.queue[idx];
@@ -308,7 +149,7 @@ function buildCardContent(state: AppState, level: QuestionLevel): HTMLElement | 
   const position = state.sessionAnswered + 1;
   const total = state.sessionAnswered + state.queue.length;
 
-  const card = buildFlashcard(q, level, state.isFlipped, (newState, btnEl) => {
+  const card = buildFlashcard(q, state.isFlipped, (newState, btnEl) => {
     const xp = XP_PER_STATE[newState];
     setLastFlashcard(card);
     answerCurrentCard(newState, xp, btnEl);
@@ -319,28 +160,29 @@ function buildCardContent(state: AppState, level: QuestionLevel): HTMLElement | 
   return viewport('game-card',
     h('div', { className: 'card-counter' }, `${faNum(position)} از ${faNum(total)}`),
     card,
-    h('p', { className: 'card-hint' }, state.isFlipped ? 'یکی از گزینه‌ها را انتخاب کن' : 'برای دیدن پاسخ، روی کارت بزن'),
   );
 }
 
 /** Granular patch for card advance within the same game session. */
-export function patchGameCard(state: AppState, level: QuestionLevel): boolean {
+export function patchGameCard(state: AppState): boolean {
   const existing = document.getElementById('app-main')?.querySelector('.view--card');
   if (!existing) return false;
-  const content = buildCardContent(state, level);
+  const content = buildCardContent(state);
   if (!content) return false;
   patchViewport(existing as HTMLElement, 'game-card', content);
+  const flashcard = content.querySelector('.flashcard') as HTMLElement | null;
+  if (flashcard) flashcard.focus();
   return true;
 }
 
-function renderCelebration(state: AppState, topic: Topic, level: QuestionLevel, categoryId: string): HTMLElement {
+function renderCelebration(state: AppState, topic: Topic, categoryId: string): HTMLElement {
   const cat = topic.categories.find((c) => c.id === categoryId);
   const box = h('div', { className: 'celebrate glass' });
   confetti(box);
   box.append(
     h('div', { className: 'celebrate__badge', attrs: { 'aria-hidden': 'true' } }, '🏆'),
     h('h2', { className: 'celebrate__title' }, 'آفرین! تمومش کردی 🎉'),
-    h('p', { className: 'celebrate__sub' }, cat ? `دسته «${cat.title}» در سطح ${LEVEL_LABEL[level]}` : ''),
+    h('p', { className: 'celebrate__sub' }, cat ? `دسته «${cat.title}»` : ''),
     h(
       'div',
       { className: 'celebrate__stats' },

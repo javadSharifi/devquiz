@@ -1,0 +1,151 @@
+/* ============================================================
+ * DevQuiz — variables.css
+ * Theme tokens (colors, radii, shadows, glows, type scale).
+ * Dark default; :root[data-theme="light"] overrides the same
+ * variables for the light theme.
+ * ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --bg: #0b0e1a;
+  --bg-grad: radial-gradient(120% 90% at 85% -10%, #1a1440 0%, #0b0e1a 55%);
+  --surface: #141a2e;
+  --surface-2: #1b2340;
+  --border: rgba(255, 255, 255, 0.09);
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.12);
+
+  /* text */
+  --text: #eef0fa;
+  --text-dim: #a7adc9;
+  --text-faint: #6d7494;
+
+  /* accents */
+  --accent: #7c5cff;
+  --accent-strong: #9d85ff;
+  --accent-2: #2fd4c9;
+  --danger: #ff5d7a;
+  --success: #3ddc84;
+
+  /* code block (used by flashcard answer body) */
+  --code-bg: #0a0c16;
+  --code-text: #c9d4ff;
+  /* card face border halo */
+  --face-halo-a: rgba(124, 92, 255, 0.55);
+  --face-halo-b: rgba(47, 212, 201, 0.35);
+  /* overlay (modal scrim) */
+  --overlay-bg: rgba(5, 7, 14, 0.6);
+  /* header / nav translucent surface */
+  --header-bg: rgba(11, 14, 26, 0.7);
+  --nav-bg: rgba(15, 18, 34, 0.85);
+  /* segmented control */
+  --seg-track: rgba(255, 255, 255, 0.06);
+  --seg-text: #a7adc9;
+  /* toast surface */
+  --toast-bg: rgba(27, 35, 64, 0.92);
+
+  /* modal surface */
+  --modal-bg: rgba(20, 26, 46, 0.92);
+  /* deep accent — gradient end on primary buttons & chips */
+  --accent-deep: #5d3df0;
+
+  /* level colors + glows */
+  --junior: #3ddc84;
+  --mid: #ffc44d;
+  --senior: #ff5da2;
+  --glow-junior: 0 0 18px rgba(61, 220, 132, 0.35), 0 0 44px rgba(61, 220, 132, 0.12);
+  --glow-mid: 0 0 18px rgba(255, 196, 77, 0.35), 0 0 44px rgba(255, 196, 77, 0.12);
+  --glow-senior: 0 0 18px rgba(255, 93, 162, 0.35), 0 0 44px rgba(255, 93, 162, 0.12);
+  --glow-accent: 0 0 14px rgba(124, 92, 255, 0.55), 0 0 34px rgba(124, 92, 255, 0.22);
+
+  /* radii */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-pill: 999px;
+
+  /* shadows */
+  --shadow-1: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.45);
+
+  /* motion */
+  --ease: 0.2s ease;
+  --flip-time: 0.5s;
+
+  /* layout */
+  --nav-h: 56px;
+  --header-h: 52px;
+
+  --font-size: 14px;
+  /* type scale: every hardcoded font-size maps to one of these so the
+   * user's font-size setting actually scales the whole UI, not just
+   * body/button. Each token is <px>@14px-base × current --font-size. */
+  --fs-0: 0;
+  --fs-9_5: calc(var(--font-size) * 9.5 / 14);
+  --fs-10: calc(var(--font-size) * 10 / 14);
+  --fs-10_5: calc(var(--font-size) * 10.5 / 14);
+  --fs-11: calc(var(--font-size) * 11 / 14);
+  --fs-11_5: calc(var(--font-size) * 11.5 / 14);
+  --fs-12: calc(var(--font-size) * 12 / 14);
+  --fs-12_5: calc(var(--font-size) * 12.5 / 14);
+  --fs-13: calc(var(--font-size) * 13 / 14);
+  --fs-13_5: calc(var(--font-size) * 13.5 / 14);
+  --fs-14: calc(var(--font-size) * 14 / 14);
+  --fs-14_5: calc(var(--font-size) * 14.5 / 14);
+  --fs-15: calc(var(--font-size) * 15 / 14);
+  --fs-15_5: calc(var(--font-size) * 15.5 / 14);
+  --fs-16: calc(var(--font-size) * 16 / 14);
+  --fs-17: calc(var(--font-size) * 17 / 14);
+  --fs-18: calc(var(--font-size) * 18 / 14);
+  --fs-22: calc(var(--font-size) * 22 / 14);
+  --fs-26: calc(var(--font-size) * 26 / 14);
+  --fs-34: calc(var(--font-size) * 34 / 14);
+  --fs-42: calc(var(--font-size) * 42 / 14);
+  --fs-44: calc(var(--font-size) * 44 / 14);
+  --fs-52: calc(var(--font-size) * 52 / 14);
+  --fs-60: calc(var(--font-size) * 60 / 14);
+  --fs-30: calc(var(--font-size) * 30 / 14);
+  --fs-24: calc(var(--font-size) * 24 / 14);
+  --font-sans: 'Vazirmatn', 'Vazir', Tahoma, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Fira Code', Consolas, monospace;
+}
+
+/* ------------------------------------------------------------
+ * Light theme overrides
+ * ------------------------------------------------------------ */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f5f6fb;
+  --bg-grad: radial-gradient(120% 90% at 85% -10%, #e6e3ff 0%, #f5f6fb 55%);
+  --surface: #ffffff;
+  --surface-2: #eef0f7;
+  --border: rgba(20, 24, 42, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(20, 24, 42, 0.08);
+
+  --text: #14182a;
+  --text-dim: #5a6178;
+  --text-faint: #8a90a8;
+
+  --accent: #6b4dff;
+  --accent-strong: #4f30ff;
+  --accent-2: #1aa49a;
+  --danger: #e63a5b;
+  --success: #1faa5a;
+
+  --code-bg: #1c1f30;
+  --code-text: #e2e6ff;
+  --face-halo-a: rgba(107, 77, 255, 0.45);
+  --face-halo-b: rgba(26, 164, 154, 0.35);
+  --overlay-bg: rgba(20, 24, 42, 0.32);
+  --header-bg: rgba(255, 255, 255, 0.78);
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --seg-track: rgba(20, 24, 42, 0.05);
+  --seg-text: #5a6178;
+  --toast-bg: rgba(255, 255, 255, 0.95);
+  --modal-bg: rgba(255, 255, 255, 0.95);
+  --accent-deep: #4f30ff;
+}

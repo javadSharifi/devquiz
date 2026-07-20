@@ -1,0 +1,165 @@
+/* ============================================================
+ * DevQuiz — features/settings.css
+ * Settings tab: grouped rows, segmented control (.seg*),
+ * topic-management badges + spinner. The .spinner keyframe
+ * lives here next to .spinner.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Settings tab
+ * ------------------------------------------------------------ */
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--fs-13);
+  text-align: right;
+  cursor: pointer;
+  transition: background var(--ease);
+}
+.settings-row:last-child {
+  border-bottom: none;
+}
+button.settings-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.settings-row--static {
+  cursor: default;
+  justify-content: space-between;
+}
+.settings-row--active {
+  color: var(--accent-strong);
+}
+.settings-row__radio {
+  color: var(--accent);
+  font-size: var(--fs-13);
+}
+.settings-row__meta {
+  margin-inline-start: auto;
+  color: var(--text-faint);
+  font-size: var(--fs-11);
+}
+.settings-row--static .settings-row__meta {
+  margin-inline-start: 0;
+}
+.settings-row__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.settings-row__main .settings-row__meta {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.settings-actions {
+  display: flex;
+  gap: 8px;
+}
+.settings-row__label {
+  font-size: var(--fs-13);
+  font-weight: 700;
+  color: var(--text);
+  flex: 0 0 auto;
+}
+
+/* ------------------------------------------------------------
+ * Segmented control (theme + font-size pickers in settings)
+ * ------------------------------------------------------------ */
+.seg-group {
+  display: inline-flex;
+  flex: 1 1 auto;
+  justify-content: stretch;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--seg-track);
+  border: 1px solid var(--border);
+  min-width: 0;
+}
+.seg {
+  flex: 1 1 0;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  padding: 6px 10px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--seg-text);
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background var(--ease), color var(--ease), box-shadow var(--ease);
+}
+.seg:hover:not(.seg--active) {
+  color: var(--text);
+}
+.seg:active {
+  transform: scale(0.97);
+}
+.seg--active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: #fff;
+  box-shadow: var(--glow-accent);
+}
+.settings-row--static .seg-group {
+  flex: 1 1 auto;
+  max-width: 220px;
+}
+.settings-actions .btn {
+  flex: 1 1 0;
+  font-size: var(--fs-12_5);
+  padding-inline: 8px;
+}
+.badge {
+  align-self: flex-start;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-10_5);
+  font-weight: 700;
+}
+.badge--update {
+  color: var(--mid);
+  background: rgba(255, 196, 77, 0.13);
+  border: 1px solid rgba(255, 196, 77, 0.4);
+}
+.catalog-host:empty {
+  display: none;
+}
+
+/* spinner */
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--text);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: -2px;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,7 +1,7 @@
 import { store } from '../state.js';
 import { getMergedTopic } from '../lib/topic-utils.js';
-import { LEVEL_LABEL, fieldRow } from '../lib/helpers.js';
-import type { CustomQuestion, QuestionLevel } from '../types.js';
+import { fieldRow } from '../lib/helpers.js';
+import type { CustomQuestion } from '../types.js';
 import type { AppState } from '../state.js';
 import { addCustomQuestion } from '../storage.js';
 import { button, h, toast } from '../ui.js';
@@ -47,16 +47,8 @@ export function renderAdd(state: AppState): HTMLElement {
   categorySelect.addEventListener('change', () => {
     const isNew = categorySelect.value === NEW_CATEGORY;
     newCatField.hidden = !isNew;
-    levelField.hidden = !isNew;
     validate();
   });
-
-  const levelSelect = h('select', { className: 'field__input', id: 'add-level' });
-  (['junior', 'mid', 'senior'] as const).forEach((lv) =>
-    levelSelect.appendChild(h('option', { value: lv }, LEVEL_LABEL[lv])),
-  );
-  const levelField = fieldRow('سطح', levelSelect, 'add-level');
-  levelField.hidden = true;
 
   const questionInput = h('textarea', {
     className: 'field__input field__input--area',
@@ -97,17 +89,16 @@ export function renderAdd(state: AppState): HTMLElement {
     const topicId = topicSelect.value;
     const isNewCat = categorySelect.value === NEW_CATEGORY;
     const categoryId = isNewCat
-      ? `custom-cat-${Date.now().toString(36)}`
+        ? `custom-cat-${crypto.randomUUID()}`
       : categorySelect.value;
-    const level = levelSelect.value as QuestionLevel;
     const q: CustomQuestion = {
-      id: `custom_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+      id: `custom_${crypto.randomUUID()}`,
       question: questionInput.value.trim(),
       answer: answerInput.value.trim(),
       topicId,
       categoryId,
       isCustom: true,
-      ...(isNewCat ? { categoryTitle: newCatInput.value.trim(), categoryLevel: level } : {}),
+      ...(isNewCat ? { categoryTitle: newCatInput.value.trim(), categoryLevel: 'junior' } : {}),
     };
     try {
       await addCustomQuestion(q);
@@ -129,7 +120,6 @@ export function renderAdd(state: AppState): HTMLElement {
     fieldRow('دسته‌بندی', categorySelect, 'add-category'),
     newCatField,
     cError,
-    levelField,
     fieldRow('سؤال', questionInput, 'add-question'),
     qError,
     fieldRow('پاسخ', answerInput, 'add-answer'),

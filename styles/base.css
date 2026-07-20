@@ -1,0 +1,81 @@
+/* ============================================================
+ * DevQuiz — base.css
+ * Font setup (@font-face), global reset, a11y helpers, glass
+ * utility. Loaded right after variables.css so tokens are in
+ * scope when the rest of the cascade runs.
+ * ============================================================ */
+
+/* --- Vazirmatn: bundled locally (MV3 CSP forbids remote fonts).
+ * Drop the woff2 files into assets/fonts/ (see assets/fonts/README).
+ * The stack degrades gracefully to Tahoma if they're absent. --- */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../assets/fonts/Vazirmatn-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../assets/fonts/Vazirmatn-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../assets/fonts/Vazirmatn-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------ */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  background-image: var(--bg-grad);
+  color: var(--text);
+  font-size: var(--font-size);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+button {
+  font-size: var(--font-size);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------
+ * Glass
+ * ------------------------------------------------------------ */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  border-radius: var(--r-lg);
+}

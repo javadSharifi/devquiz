@@ -9,8 +9,21 @@
 
 import { fetchCatalog, getDownloadedVersions } from './storage.js';
 import { compareVersions } from './types.js';
+import type { TopicCatalogItem } from './types.js';
 
 const ALARM_NAME = 'devquiz-catalog-check';
+const RETRY_ALARM_NAME = 'devquiz-catalog-retry';
+
+/** Pure: check whether any catalog item is newer than the local version. */
+export function detectUpdates(
+  versions: Record<string, string>,
+  topics: TopicCatalogItem[],
+): boolean {
+  return topics.some((item) => {
+    const local = versions[item.id];
+    return local !== undefined && compareVersions(item.version, local) > 0;
+  });
+}
 
 chrome.runtime.onInstalled.addListener((details) => {
   void ensureAlarm();
@@ -35,7 +48,7 @@ async function ensureAlarm(): Promise<void> {
 }
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name !== ALARM_NAME) return;
+  if (alarm.name !== ALARM_NAME && alarm.name !== RETRY_ALARM_NAME) return;
   void checkForUpdates();
 });
 
@@ -45,10 +58,7 @@ async function checkForUpdates(): Promise<void> {
     const ids = Object.keys(versions);
     if (ids.length === 0) return; // nothing downloaded yet
     const catalog = await fetchCatalog();
-    const hasUpdate = catalog.topics.some((item) => {
-      const local = versions[item.id];
-      return local !== undefined && compareVersions(item.version, local) > 0;
-    });
+    const hasUpdate = detectUpdates(versions, catalog.topics);
     if (hasUpdate) {
       await chrome.action.setBadgeBackgroundColor({ color: '#7c5cff' });
       await chrome.action.setBadgeText({ text: '🔔' });
@@ -56,6 +66,6 @@ async function checkForUpdates(): Promise<void> {
       await chrome.action.setBadgeText({ text: '' });
     }
   } catch {
-    // Offline / transient failure — try again on the next alarm.
+    await chrome.alarms.create(RETRY_ALARM_NAME, { delayInMinutes: 30 });
   }
 }

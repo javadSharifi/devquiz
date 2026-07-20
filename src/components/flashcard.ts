@@ -1,19 +1,16 @@
 import { renderMarkdown } from '../markdown.js';
 import { store } from '../state.js';
-import { LEVEL_LABEL } from '../lib/helpers.js';
-import type { Question, QuestionLevel, QuestionState } from '../types.js';
+import type { Question, QuestionState } from '../types.js';
 import { button, h } from '../ui.js';
 
 export function buildFlashcard(
   question: Question,
-  level: QuestionLevel,
   flipped: boolean,
   onAnswer: (s: Exclude<QuestionState, 'unseen'>, btn: HTMLElement) => void,
 ): HTMLElement {
   const front = h(
     'div',
     { className: 'flashcard__face flashcard__face--front' },
-    h('div', { className: 'face__badge' }, LEVEL_LABEL[level]),
     h('div', { className: 'face__body' }, renderMarkdown(question.question)),
     h('div', { className: 'face__foot', attrs: { 'aria-hidden': 'true' } }, '👆 پاسخ'),
   );
@@ -73,6 +70,4 @@ export function applyFlip(flipped: boolean, mainEl: HTMLElement, liveRegion: HTM
     flipped ? 'پاسخ. برای برگشتن به سؤال کلیک کن' : 'سؤال. برای دیدن پاسخ کلیک کن',
   );
   liveRegion.textContent = flipped ? 'پاسخ نمایش داده شد' : 'سؤال نمایش داده شد';
-  const hint = mainEl.querySelector<HTMLElement>('.card-hint');
-  if (hint) hint.textContent = flipped ? 'یکی از گزینه‌ها را انتخاب کن' : 'برای دیدن پاسخ، روی کارت بزن';
 }

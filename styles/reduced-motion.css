@@ -1,0 +1,62 @@
+/* ============================================================
+ * DevQuiz — reduced-motion.css
+ * Loaded LAST in the cascade so it can override component
+ * animations when the user has prefers-reduced-motion: reduce.
+ * Targets only selectors defined in the component files
+ * (flashcard, feedback, header, skeleton, app-shell) — does
+ * not affect layout/navigation or game/all-games sections,
+ * matching the original single-file behavior.
+ * ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .flashcard__inner {
+    transition: none;
+    transform-style: flat;
+  }
+  .flashcard--flipped .flashcard__inner {
+    transform: none;
+  }
+  .flashcard__face {
+    transition: opacity 0.25s ease;
+  }
+  .flashcard__face--front {
+    opacity: 1;
+  }
+  .flashcard__face--back {
+    transform: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .flashcard--flipped .flashcard__face--front {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .flashcard--flipped .flashcard__face--back {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .card-enter {
+    animation: fade-in 0.25s ease;
+  }
+  .card-exit {
+    animation: fade-out 0.18s ease forwards;
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+  .confetti,
+  .skeleton::after,
+  .celebrate__badge,
+  .stat--pulse,
+  .xp-float,
+  .view {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,61 @@
+/* ============================================================
+ * DevQuiz — features/review.css
+ * "Review" tab: collapsible list of want_to_learn / skip items.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Review tab
+ * ------------------------------------------------------------ */
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.review-item {
+  overflow: hidden;
+}
+.review-item__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 12px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--fs-13);
+  text-align: right;
+  cursor: pointer;
+  transition: background var(--ease);
+}
+.review-item__head:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.review-item__q {
+  flex: 1 1 auto;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.review-item__chev {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  transition: transform var(--ease);
+  font-size: var(--fs-16);
+}
+.review-item--open .review-item__chev {
+  transform: rotate(-90deg);
+}
+.review-item__body {
+  padding: 0 12px 12px;
+  border-top: 1px dashed var(--border);
+  padding-top: 10px;
+  font-size: var(--fs-13);
+}
+.review-item__body .btn {
+  margin-top: 8px;
+}

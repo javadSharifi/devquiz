@@ -1,0 +1,43 @@
+/* ============================================================
+ * DevQuiz — components/modal.css
+ * Full-screen overlay + confirmDialog modal surface.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Overlay / modal
+ * ------------------------------------------------------------ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.overlay--in {
+  opacity: 1;
+}
+.modal {
+  width: 100%;
+  max-width: 320px;
+  padding: 18px;
+  background: var(--modal-bg);
+}
+.modal__title {
+  margin: 0 0 6px;
+  font-size: var(--fs-15);
+}
+.modal__msg {
+  margin: 0 0 14px;
+  color: var(--text-dim);
+  font-size: var(--fs-13);
+}
+.modal__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+}

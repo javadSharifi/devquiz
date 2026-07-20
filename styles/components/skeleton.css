@@ -1,0 +1,49 @@
+/* ============================================================
+ * DevQuiz — components/skeleton.css
+ * Shimmer placeholders. The shimmer keyframe lives here next
+ * to .skeleton::after.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Skeleton shimmer
+ * ------------------------------------------------------------ */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(100%);
+  background: linear-gradient(
+    -90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.3s infinite;
+}
+@keyframes shimmer {
+  to {
+    transform: translateX(-100%);
+  }
+}
+.skeleton--header {
+  height: 24px;
+  width: 55%;
+  margin-bottom: 12px;
+}
+.skeleton--row {
+  height: 52px;
+}
+.skeleton--card {
+  height: 84px;
+}

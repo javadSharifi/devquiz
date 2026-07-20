@@ -1,0 +1,47 @@
+/* ============================================================
+ * DevQuiz — layout/navigation.css
+ * Bottom 5-tab nav with neon-glow active state.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Bottom navigation — neon glow active state
+ * ------------------------------------------------------------ */
+.bottom-nav {
+  height: var(--nav-h);
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-top: 1px solid var(--border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  opacity: 0.75;
+  font-family: inherit;
+  transition: all var(--ease);
+  padding: 4px 2px;
+}
+.nav-item:active {
+  transform: scale(0.96);
+}
+.nav-item__label {
+  font-size: var(--fs-9_5);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nav-item--active {
+  color: var(--accent-strong);
+  opacity: 1;
+}
+.nav-item--active svg {
+  filter: drop-shadow(0 0 7px rgba(124, 92, 255, 0.9));
+}

@@ -1,0 +1,43 @@
+/* ============================================================
+ * DevQuiz — components/progress.css
+ * Two visuals: SVG progress ring (.ring*) and the linear
+ * .progress / .progress__fill bar.
+ * ============================================================ */
+
+/* progress ring */
+.ring-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+.ring {
+  transform: rotate(-90deg);
+}
+.ring__track {
+  stroke: var(--surface-2);
+}
+.ring__fill {
+  transition: stroke-dashoffset 0.6s ease;
+}
+.ring__label {
+  position: absolute;
+  font-size: var(--fs-9_5);
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+/* progress bar */
+.progress {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.progress__fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.5s ease;
+}

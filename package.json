@@ -9,7 +9,9 @@
     "watch": "esbuild src/popup.ts src/onboarding.ts src/background.ts --bundle --format=esm --target=es2022 --outdir=dist --watch",
     "build:tsc": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.278",

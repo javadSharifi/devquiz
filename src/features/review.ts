@@ -1,6 +1,6 @@
 import { buildFlashcard } from '../components/flashcard.js';
 import { store } from '../state.js';
-import { catOf, findQuestion, getMergedTopic } from '../lib/topic-utils.js';
+import { findQuestion, getMergedTopic } from '../lib/topic-utils.js';
 import { answerRandomCard as undoAnswerRandomCard, XP_PER_STATE, setLastFlashcard } from '../lib/undo.js';
 import { backButton } from '../lib/helpers.js';
 import type { Category, Question } from '../types.js';
@@ -40,7 +40,7 @@ export function renderReview(state: AppState): HTMLElement {
           h('h2', { className: 'view__title view__title--sm' }, '🎲 سؤال تصادفی'),
         ),
       );
-      const card = buildFlashcard(q, catOf(q.id)?.level ?? 'junior', state.isFlipped, (newState, btn) => {
+      const card = buildFlashcard(q, state.isFlipped, (newState, btn) => {
         const xp = XP_PER_STATE[newState];
         setLastFlashcard(card);
         undoAnswerRandomCard(q, newState, xp, pickRandomQuestion, btn);
@@ -48,7 +48,6 @@ export function renderReview(state: AppState): HTMLElement {
       card.classList.add('card-enter');
       setLastFlashcard(card);
       wrap.appendChild(card);
-      wrap.appendChild(h('p', { className: 'card-hint' }, state.isFlipped ? 'یکی از گزینه‌ها را انتخاب کن' : 'برای دیدن پاسخ، روی کارت بزن'));
       return wrap;
     }
   }

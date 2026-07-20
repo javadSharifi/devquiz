@@ -1,0 +1,94 @@
+/* ============================================================
+ * DevQuiz — layout/app-shell.css
+ * Popup body (380×600), flex app column, main scroll region,
+ * view containers + titles/back button. The .view-in keyframe
+ * lives here next to its only consumer (.view).
+ * ============================================================ */
+
+/* HARD CONSTRAINT: 380×600, no outer scrollbars — only inner
+ * content areas scroll. */
+.popup-body {
+  width: 380px;
+  height: 600px;
+  overflow: hidden;
+}
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ------------------------------------------------------------
+ * Main scroll region
+ * ------------------------------------------------------------ */
+.app-main {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 14px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-2) transparent;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: view-in 0.22s ease;
+}
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.view__title {
+  margin: 0;
+  font-size: var(--fs-17);
+  font-weight: 700;
+}
+.view__title--sm {
+  font-size: var(--fs-14_5);
+}
+.view__sub {
+  margin: -6px 0 2px;
+  color: var(--text-dim);
+  font-size: var(--fs-13);
+}
+.view-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title {
+  margin: 8px 0 0;
+  font-size: var(--fs-13_5);
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.muted-note {
+  color: var(--text-faint);
+  font-size: var(--fs-12);
+  margin: 4px 0 0;
+}
+
+.back-btn {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all var(--ease);
+}
+.back-btn:hover {
+  color: var(--text);
+  border-color: var(--glass-border);
+}
+.back-btn:active {
+  transform: scale(0.96);
+}
