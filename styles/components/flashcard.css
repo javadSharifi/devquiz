@@ -30,6 +30,13 @@
   cursor: pointer;
   outline-offset: 4px;
 }
+/* Web build: card fills more of the viewport instead of staying
+ * locked to the 380px popup height. min() keeps it sensible on
+ * short screens, min-height preserves the popup baseline. */
+.popup-body.web-body .flashcard {
+  height: min(72vh, 600px);
+  min-height: 380px;
+}
 .flashcard__inner {
   position: relative;
   width: 100%;
