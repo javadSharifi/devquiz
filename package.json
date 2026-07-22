@@ -4,6 +4,7 @@
   "private": true,
   "description": "DevQuiz — gamified Persian technical-interview flashcards. One codebase, three targets: Chrome MV3, Firefox MV3, static web (GitHub Pages).",
   "type": "module",
+  "packageManager": "pnpm@9.15.9",
   "scripts": {
     "build": "node build/build.mjs all",
     "build:chrome": "node build/build.mjs chrome",
