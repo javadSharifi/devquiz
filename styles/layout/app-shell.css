@@ -37,6 +37,40 @@
 }
 
 /* ------------------------------------------------------------
+ * Web build (GitHub Pages): same fullscreen treatment as
+ * ?fs=1 but always on — popup-body's 380×600 lock is dropped,
+ * the app fills the viewport and reflows on small screens.
+ * ------------------------------------------------------------ */
+.popup-body.web-body {
+  width: 100vw;
+  min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
+  background: var(--bg);
+}
+.popup-body.web-body .app {
+  max-width: 880px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ------------------------------------------------------------
+ * Responsive: tighten padding on narrow viewports so the web
+ * build is usable on phones. The extension popup is always
+ * 380 wide, so these only affect the web build in practice.
+ * ------------------------------------------------------------ */
+@media (max-width: 480px) {
+  .popup-body.web-body .app-main {
+    padding: 10px 10px 14px;
+  }
+}
+@media (min-width: 768px) {
+  .popup-body.web-body .app-main {
+    padding: 20px 20px 24px;
+  }
+}
+
+/* ------------------------------------------------------------
  * Main scroll region
  * ------------------------------------------------------------ */
 .app-main {

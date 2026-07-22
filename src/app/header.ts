@@ -23,7 +23,7 @@ export function renderHeader(): void {
   xpValueEl = h('span', { className: 'stat__value' }, faNum(gamification.xp));
   headerEl.replaceChildren(
     h('div', { className: 'brand' }, h('span', { className: 'brand__logo', attrs: { 'aria-hidden': 'true' } }, '⚡'), 'دِوکوئیز'),
-    fullscreenToggle(),
+    ...(platform.isExtension ? [fullscreenToggle()] : []),
     h(
       'div',
       { className: 'header-stats' },
