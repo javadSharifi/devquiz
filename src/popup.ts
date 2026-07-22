@@ -11,6 +11,10 @@ import type { AppShell } from './app/router.js';
 const root = document.getElementById('app');
 if (!root) throw new Error('missing #app root');
 
+if (new URLSearchParams(location.search).get('fs') === '1') {
+  document.body.classList.add('fullscreen');
+}
+
 const shell: AppShell = {
   headerEl: h('header', { className: 'app-header' }),
   mainEl: h('main', { className: 'app-main', id: 'app-main' }),

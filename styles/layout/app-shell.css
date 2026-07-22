@@ -19,6 +19,24 @@
 }
 
 /* ------------------------------------------------------------
+ * Fullscreen mode (?fs=1): opened in a regular tab via
+ * chrome.tabs.create. Drop the popup-size lock, center a
+ * readable column, allow the page itself to scroll.
+ * ------------------------------------------------------------ */
+.popup-body.fullscreen {
+  width: 100vw;
+  min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
+  background: var(--bg);
+}
+.popup-body.fullscreen .app {
+  max-width: 880px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ------------------------------------------------------------
  * Main scroll region
  * ------------------------------------------------------------ */
 .app-main {

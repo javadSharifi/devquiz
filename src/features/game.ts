@@ -1,14 +1,20 @@
 import { buildFlashcard } from '../components/flashcard.js';
 import { store } from '../state.js';
-import { getMergedTopic, categoryStats } from '../lib/topic-utils.js';
+import { getMergedTopic, categoryStats, levelStats } from '../lib/topic-utils.js';
 import { answerCurrentCard, XP_PER_STATE, setLastFlashcard } from '../lib/undo.js';
 import { backButton, statChip, topicIconEl } from '../lib/helpers.js';
 import { viewport, patchViewport } from '../lib/dom-patch.js';
 import { renderCategoryList } from './game/cat-list.js';
-import type { Topic } from '../types.js';
+import type { QuestionLevel, Topic } from '../types.js';
 import type { AppState } from '../state.js';
 import { faNum } from '../types.js';
 import { button, confetti, emptyState, errorCard, h, progressBar } from '../ui.js';
+
+const LEVEL_INFO: { level: QuestionLevel; label: string; tagline: string; emoji: string; cssClass: string }[] = [
+  { level: 'junior', label: 'جونیور', tagline: 'مبانی و اصول پایه', emoji: '🌱', cssClass: 'level-pick__card--junior' },
+  { level: 'mid', label: 'میدلول', tagline: 'حل مسئله و طراحی', emoji: '⚙️', cssClass: 'level-pick__card--mid' },
+  { level: 'senior', label: 'سنیور', tagline: 'معماری و تصمیم‌های سخت', emoji: '🧭', cssClass: 'level-pick__card--senior' },
+];
 
 export function renderGame(state: AppState): HTMLElement {
   const topic = getMergedTopic(state.activeTopicId);
@@ -24,7 +30,11 @@ export function renderGame(state: AppState): HTMLElement {
   }
 
   if (state.selectedCategoryId === null) {
-    const wrap = renderAllCategories(state, topic);
+    const levelsPresent = new Set(topic.categories.map((c) => c.level));
+    const multiLevel = levelsPresent.size > 1;
+    const wrap = multiLevel && state.selectedLevel === null
+      ? renderLevelPicker(state, topic)
+      : renderAllCategories(state, topic);
     const switcher = renderTopicSwitcher(state);
     if (switcher) wrap.prepend(switcher);
     return wrap;
@@ -64,22 +74,94 @@ function renderTopicSwitcher(state: AppState): HTMLElement | null {
   return h('div', { className: 'topic-switcher-wrap' }, row);
 }
 
-function renderAllCategories(state: AppState, topic: Topic): HTMLElement {
-  const wrap = h('div', { className: 'view view--categories' });
+function renderLevelPicker(state: AppState, topic: Topic): HTMLElement {
+  const wrap = h('div', { className: 'view view--level-pick' });
   wrap.appendChild(
     h(
       'div',
       { className: 'view-head' },
       backButton(() => store.dispatch({ type: 'SET_TAB', tab: 'all-games' })),
+      h('h2', { className: 'view__title' }, 'انتخاب سطح'),
+    ),
+  );
+  wrap.appendChild(
+    h('p', { className: 'view__sub' }, 'یکی از سطوح را انتخاب کن. سوالات همون سطح و بالاتر نمایش داده می‌شن.'),
+  );
+
+  const list = h('div', { className: 'level-pick__list' });
+  for (const info of LEVEL_INFO) {
+    const { done, total } = levelStats(topic, state.activeTopicId, info.level, state.userStates);
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    const card = h(
+      'button',
+      {
+        className: `level-pick__card glass ${info.cssClass}`,
+        type: 'button',
+        attrs: { 'aria-label': `سطح ${info.label}: ${faNum(pct)} درصد پاسخ` },
+        onClick: () => store.dispatch({ type: 'SELECT_LEVEL', level: info.level }),
+      },
+      h('div', { className: 'level-pick__head' },
+        h('span', { className: 'level-pick__emoji', attrs: { 'aria-hidden': 'true' } }, info.emoji),
+        h('div', { className: 'level-pick__titles' },
+          h('span', { className: 'level-pick__label' }, info.label),
+          h('span', { className: 'level-pick__tag' }, info.tagline),
+        ),
+        h('div', { className: 'level-pick__pct' }, `${faNum(pct)}٪`),
+      ),
+      h('div', { className: 'level-pick__bar' },
+        h('div', { className: 'level-pick__bar-fill', style: { width: `${pct}%` } }),
+      ),
+      h('div', { className: 'level-pick__meta' },
+        h('span', {}, `${faNum(done)} از ${faNum(total)} سؤال پاسخ داده شده`),
+      ),
+    );
+    list.appendChild(card);
+  }
+  wrap.appendChild(list);
+  return wrap;
+}
+
+function renderAllCategories(state: AppState, topic: Topic): HTMLElement {
+  const wrap = h('div', { className: 'view view--categories' });
+  const levelsPresent = new Set(topic.categories.map((c) => c.level));
+  const multiLevel = levelsPresent.size > 1;
+  const onBack = multiLevel
+    ? () => store.dispatch({ type: 'SELECT_LEVEL', level: null })
+    : () => store.dispatch({ type: 'SET_TAB', tab: 'all-games' });
+
+  wrap.appendChild(
+    h(
+      'div',
+      { className: 'view-head' },
+      backButton(onBack),
       h('h2', { className: 'view__title' }, 'دسته‌بندی‌ها'),
     ),
   );
+  if (state.selectedLevel !== null) {
+    const info = LEVEL_INFO.find((l) => l.level === state.selectedLevel);
+    wrap.appendChild(
+      h('div', { className: 'level-filter-note' },
+        h('span', {}, `سطح انتخاب‌شده: ${info?.label ?? state.selectedLevel}`),
+        h('button', {
+          className: 'level-filter-note__clear',
+          type: 'button',
+          attrs: { 'aria-label': 'تغییر سطح' },
+          onClick: () => store.dispatch({ type: 'SELECT_LEVEL', level: null }),
+        }, 'تغییر سطح'),
+      ),
+    );
+  }
+
+  const visibleCats = state.selectedLevel === null
+    ? topic.categories
+    : topic.categories.filter((c) => c.level === state.selectedLevel);
+
   const grid = h('div', { className: 'cat-grid' });
-  if (topic.categories.length === 0) {
-    wrap.appendChild(emptyState('🗂️', 'دسته‌ای پیدا نشد', 'هنوز سوالی ثبت نشده است.'));
+  if (visibleCats.length === 0) {
+    wrap.appendChild(emptyState('🗂️', 'دسته‌ای پیدا نشد', 'برای این سطح سوالی وجود ندارد.'));
     return wrap;
   }
-  for (const cat of topic.categories) {
+  for (const cat of visibleCats) {
     const { done, total } = categoryStats(cat, state.activeTopicId, state.userStates);
     const card = h(
       'button',

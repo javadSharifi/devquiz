@@ -195,6 +195,23 @@
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
   transition: width 0.4s ease;
 }
+.game-card__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+.game-card__update-btn {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: var(--fs-12);
+  background: rgba(255, 196, 77, 0.15);
+  color: var(--mid);
+  border: 1px solid rgba(255, 196, 77, 0.4);
+}
+.game-card__update-btn:hover {
+  background: rgba(255, 196, 77, 0.25);
+  box-shadow: var(--glow-mid);
+}
 .all-games__update-host {
   margin-top: 2px;
 }

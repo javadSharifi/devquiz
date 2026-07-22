@@ -26,9 +26,10 @@ export async function fetchValidatedJson<T>(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 10_000);
   try {
-    const res = await fetch(url, {
+    const bust = url.includes('?') ? `&_=${Date.now()}` : `?_=${Date.now()}`;
+    const res = await fetch(`${url}${bust}`, {
       signal: controller.signal,
-      cache: 'no-cache',
+      cache: 'no-store',
     });
     if (!res.ok) throw new Error(`خطای شبکه (${res.status})`);
     let data: unknown;

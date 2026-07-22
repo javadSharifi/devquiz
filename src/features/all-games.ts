@@ -10,7 +10,7 @@ import { topicIconEl } from '../lib/helpers.js';
 import { compareVersions, faDigits, faNum } from '../types.js';
 import type { TopicCatalogItem } from '../types.js';
 import type { AppState } from '../state.js';
-import { emptyState, h, toast } from '../ui.js';
+import { button, emptyState, h, toast } from '../ui.js';
 
 const inflight = new Set<string>();
 
@@ -90,12 +90,20 @@ function gameCard(state: AppState, item: TopicCatalogItem): HTMLElement {
           h('div', { className: 'game-card__bar-fill', style: { width: `${pct(answered, totalQuestions)}%` } }),
         )
       : null,
+    hasUpdate
+      ? h('div', { className: 'game-card__actions' },
+          button('بروزرسانی', (e) => {
+            e.stopPropagation();
+            void downloadOne(item);
+          }, { variant: 'primary', className: 'game-card__update-btn' }),
+        )
+      : null,
   );
 
   if (isDownloaded && !hasUpdate && !downloading) {
     card.classList.add('game-card--clickable');
     card.addEventListener('click', () => selectTopic(item.id));
-  } else if ((hasUpdate || !isDownloaded) && !downloading) {
+  } else if (!isDownloaded && !downloading) {
     card.classList.add('game-card--clickable');
     card.addEventListener('click', () => void downloadOne(item));
   }
@@ -142,13 +150,13 @@ async function downloadOne(item: TopicCatalogItem): Promise<void> {
   try {
     await downloadTopic(item);
     const [topics, versions, us] = await Promise.all([getTopics(), getDownloadedVersions(), getUserStates()]);
+    inflight.delete(item.id);
     store.dispatch({ type: 'REPLACE_TOPICS', topics });
     store.dispatch({ type: 'REPLACE_DOWNLOADED_VERSIONS', versions });
     store.dispatch({ type: 'REPLACE_USER_STATES', userStates: us });
     store.dispatch({ type: 'DATA_CHANGED' });
   } catch (e) {
-    toast(`دانلود «${item.title}» ناموفق بود.`, { kind: 'error', duration: 3000 });
-  } finally {
     inflight.delete(item.id);
+    toast(`دانلود «${item.title}» ناموفق بود.`, { kind: 'error', duration: 3000 });
   }
 }

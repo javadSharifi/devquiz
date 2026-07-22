@@ -29,6 +29,31 @@
 .brand__logo {
   filter: drop-shadow(0 0 6px rgba(124, 92, 255, 0.8));
 }
+.header-fs-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-right: auto;
+  margin-left: 8px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-dim);
+  font-size: var(--fs-16);
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--ease);
+}
+.header-fs-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: var(--glow-accent);
+}
+.header-fs-btn:active {
+  transform: scale(0.94);
+}
 
 .header-stats {
   display: flex;

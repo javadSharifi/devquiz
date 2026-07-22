@@ -22,6 +22,7 @@ export function renderHeader(): void {
   xpValueEl = h('span', { className: 'stat__value' }, faNum(gamification.xp));
   headerEl.replaceChildren(
     h('div', { className: 'brand' }, h('span', { className: 'brand__logo', attrs: { 'aria-hidden': 'true' } }, '⚡'), 'دِوکوئیز'),
+    fullscreenToggle(),
     h(
       'div',
       { className: 'header-stats' },
@@ -51,4 +52,23 @@ export function updateHeaderStats(): void {
     void xpValueEl.parentElement?.offsetWidth;
     xpValueEl.parentElement?.classList.add('stat--pulse');
   }
+}
+
+function fullscreenToggle(): HTMLElement {
+  const isFs = new URLSearchParams(location.search).get('fs') === '1';
+  const btn = h('button', {
+    className: 'header-fs-btn',
+    type: 'button',
+    title: isFs ? 'بستن حالت تمام‌صفحه' : 'باز کردن در صفحه بزرگ',
+    attrs: { 'aria-label': isFs ? 'بستن حالت تمام‌صفحه' : 'باز کردن در صفحه بزرگ' },
+    onClick: () => {
+      if (isFs) {
+        window.close();
+        return;
+      }
+      chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html?fs=1') });
+      window.close();
+    },
+  }, isFs ? '✕' : '⛶');
+  return btn;
 }
