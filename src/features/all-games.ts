@@ -69,7 +69,7 @@ function gameCard(state: AppState, item: TopicCatalogItem): HTMLElement {
       topicIconEl(item),
       h('div', { className: 'game-card__titles' },
         h('span', { className: 'game-card__title' }, item.title),
-        h('span', { className: 'game-card__ver' }, `نسخه ${faDigits(item.version)}`),
+        isDownloaded ? h('span', { className: 'game-card__ver' }, `نسخه ${faDigits(item.version)}`) : null,
       ),
       active
         ? h('span', { className: 'game-card__active-badge', attrs: { 'aria-hidden': 'true' } }, 'فعال')
@@ -82,9 +82,11 @@ function gameCard(state: AppState, item: TopicCatalogItem): HTMLElement {
           h('span', {}, `${faNum(totalQuestions)} سؤال`),
           h('span', {}, `${faNum(answered)} پاسخ`),
         )
-      : h('div', { className: 'game-card__meta' },
-          h('span', { className: 'game-card__status' }, downloading ? 'در حال دانلود…' : 'در انتظار دانلود'),
-        ),
+      : downloading
+        ? h('div', { className: 'game-card__meta' },
+            h('span', { className: 'game-card__status' }, 'در حال دانلود…'),
+          )
+        : null,
     isDownloaded && !downloading
       ? h('div', { className: 'game-card__bar' },
           h('div', { className: 'game-card__bar-fill', style: { width: `${pct(answered, totalQuestions)}%` } }),
