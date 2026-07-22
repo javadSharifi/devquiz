@@ -36,8 +36,7 @@
  * preserves the popup baseline. */
 .popup-body.web-body .flashcard,
 .popup-body.fullscreen .flashcard {
-  height: min(72vh, 600px);
-  min-height: 380px;
+  height: clamp(380px, 58vh, 520px);
 }
 .flashcard__inner {
   position: relative;
