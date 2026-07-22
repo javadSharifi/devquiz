@@ -15,7 +15,7 @@ function mountShell(): AppShell | null {
   if (!root) return null;
 
   const headerEl = h('header', { className: 'app-header' });
-  const navEl = h('nav', { className: 'app-nav' });
+  const navEl = h('nav', { className: 'bottom-nav', attrs: { 'aria-label': 'ناوبری اصلی' } });
   const mainEl = h('main', { className: 'app-main' });
   const liveRegion = h('div', {
     className: 'sr-only',
