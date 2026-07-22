@@ -30,10 +30,12 @@
   cursor: pointer;
   outline-offset: 4px;
 }
-/* Web build: card fills more of the viewport instead of staying
- * locked to the 380px popup height. min() keeps it sensible on
- * short screens, min-height preserves the popup baseline. */
-.popup-body.web-body .flashcard {
+/* Web build and extension fullscreen (?fs=1): card fills more
+ * of the viewport instead of staying locked to the 380px popup
+ * height. min() keeps it sensible on short screens, min-height
+ * preserves the popup baseline. */
+.popup-body.web-body .flashcard,
+.popup-body.fullscreen .flashcard {
   height: min(72vh, 600px);
   min-height: 380px;
 }

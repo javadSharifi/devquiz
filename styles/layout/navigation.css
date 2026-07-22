@@ -22,7 +22,8 @@
  * The extension popup is a fixed 600px column, so this only
  * affects the GitHub Pages build.
  * ------------------------------------------------------------ */
-.popup-body.web-body .bottom-nav {
+.popup-body.web-body .bottom-nav,
+.popup-body.fullscreen .bottom-nav {
   position: fixed;
   inset: auto 0 0 0;
   width: 100%;
@@ -30,7 +31,8 @@
   margin: 0 auto;
   z-index: 20;
 }
-.popup-body.web-body .app-main {
+.popup-body.web-body .app-main,
+.popup-body.fullscreen .app-main {
   padding-bottom: calc(var(--nav-h) + 12px);
 }
 .nav-item {
