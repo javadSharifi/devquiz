@@ -2,7 +2,7 @@ import { h } from '../../components/hyperscript.js';
 import { button } from '../../components/button.js';
 import { toast } from '../../components/toast.js';
 import { store } from '../../state.js';
-import { getCustomQuestions, importCustomQuestions } from '../../storage.js';
+import { getCustomQuestions, importCustomQuestions, setLocal } from '../../storage.js';
 import { faNum, isQuestionState } from '../../types.js';
 import type { Gamification, QuestionState } from '../../types.js';
 
@@ -77,14 +77,14 @@ export async function importBackupFromFile(file: File): Promise<void> {
       if (!isValidUserStates(obj.userStates)) {
         throw new Error('ساختار userStates در فایل نامعتبر است.');
       }
-      await chrome.storage.local.set({ user_states: obj.userStates });
+      await setLocal('user_states', obj.userStates);
       store.dispatch({ type: 'REPLACE_USER_STATES', userStates: obj.userStates });
     }
     if (obj.gamification) {
       if (!isValidGamification(obj.gamification)) {
         throw new Error('ساختار gamification در فایل نامعتبر است.');
       }
-      await chrome.storage.local.set({ gamification: obj.gamification });
+      await setLocal('gamification', obj.gamification);
       store.dispatch({ type: 'SET_GAMIFICATION', gamification: obj.gamification });
     }
     toast('اطلاعات با موفقیت بازیابی شد', { kind: 'success' });

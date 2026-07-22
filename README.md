@@ -1,8 +1,22 @@
 # DevQuiz ⚡ — تمرین گیمیفای‌شده سوالات مصاحبه فنی
 
-A Chrome (Manifest V3) extension popup for practicing Persian technical-interview
-questions as a dark, Duolingo-style flashcard game: 3D card flips, daily streaks,
-XP, progress rings, undo, celebration screens — fully RTL with LTR code blocks.
+A Chrome / Firefox MV3 extension and a static web app for practicing Persian
+technical-interview questions as a dark, Duolingo-style flashcard game: 3D
+card flips, daily streaks, XP, progress rings, undo, celebration screens —
+fully RTL with LTR code blocks. One TypeScript codebase, three shipping
+targets. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the platform-adapter
+design.
+
+## Targets
+
+| Target | Build | Install |
+|---|---|---|
+| Chrome MV3 | `pnpm run build:chrome` | Load `dist/chrome/` unpacked |
+| Firefox MV3 | `pnpm run build:firefox` | Load `dist/firefox/` in `about:debugging` |
+| GitHub Pages | `pnpm run build:web` | Auto-deployed by `.github/workflows/deploy-web.yml` |
+
+The web build is published to GitHub Pages automatically on every push to
+`main`. One-time setup: **Settings → Pages → Source = "GitHub Actions"**.
 
 ## Install (unpacked)
 

@@ -4,6 +4,12 @@ const localStore = new Map<string, unknown>();
 
 beforeEach(() => {
   localStore.clear();
+  // The production code goes through the platform adapter
+  // (web-adapter in tests, since src/platform/index.ts is the
+  // web default). The web-adapter reads window.localStorage;
+  // the global in-memory shim from test/setup.ts is the one
+  // actually hit. Clear it so state never leaks across tests.
+  globalThis.localStorage.clear();
   // @ts-expect-error - replace chrome stub for this suite only
   globalThis.chrome = {
     storage: {

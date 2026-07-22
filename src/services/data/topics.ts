@@ -37,7 +37,10 @@ export async function downloadTopic(item: TopicCatalogItem): Promise<Topic> {
     topics[item.id] = topic;
     const versions = await getDownloadedVersions();
     versions[item.id] = item.version;
-    await chrome.storage.local.set({ topics, downloaded_versions: versions });
+    await Promise.all([
+      setLocal('topics', topics),
+      setLocal('downloaded_versions', versions),
+    ]);
     await cleanupOrphanStates(item.id, topic);
     return topic;
   });
@@ -101,11 +104,11 @@ export async function removeTopic(topicId: string): Promise<void> {
     for (const key of Object.keys(states)) {
       if (key.startsWith(prefix)) delete states[key];
     }
-    await chrome.storage.local.set({
-      topics,
-      downloaded_versions: versions,
-      user_states: states,
-    });
+    await Promise.all([
+      setLocal('topics', topics),
+      setLocal('downloaded_versions', versions),
+      setLocal('user_states', states),
+    ]);
     const activeId = await getActiveTopicId();
     if (activeId === topicId) {
       await setActiveTopicId('');

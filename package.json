@@ -2,16 +2,19 @@
   "name": "devquiz",
   "version": "1.0.0",
   "private": true,
-  "description": "DevQuiz — gamified Persian technical-interview flashcards (Chrome MV3 extension)",
+  "description": "DevQuiz — gamified Persian technical-interview flashcards. One codebase, three targets: Chrome MV3, Firefox MV3, static web (GitHub Pages).",
   "type": "module",
   "scripts": {
-    "build": "esbuild src/popup.ts src/onboarding.ts src/background.ts --bundle --format=esm --target=es2022 --outdir=dist --minify",
-    "watch": "esbuild src/popup.ts src/onboarding.ts src/background.ts --bundle --format=esm --target=es2022 --outdir=dist --watch",
-    "build:tsc": "tsc -p tsconfig.json",
+    "build": "node build/build.mjs all",
+    "build:chrome": "node build/build.mjs chrome",
+    "build:firefox": "node build/build.mjs firefox",
+    "build:web": "node build/build.mjs web",
+    "watch": "node build/build.mjs chrome --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "clean": "rm -rf dist/chrome dist/firefox dist/web"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.278",

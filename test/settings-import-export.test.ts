@@ -40,6 +40,7 @@ vi.mock('../src/state.js', () => ({
 vi.mock('../src/storage.js', () => ({
   importCustomQuestions: hoisted.importCustomQuestions,
   getCustomQuestions: hoisted.getCustomQuestions,
+  setLocal: hoisted.chromeStorageSet,
 }));
 
 vi.mock('../src/components/toast.js', () => ({
@@ -161,7 +162,7 @@ describe('importBackupFromFile', () => {
       JSON.stringify({ userStates: { 'js:q1': { state: 'know', updatedAt: 1 } } }),
     );
     await importBackupFromFile(f);
-    expect(hoisted.chromeStorageSet).toHaveBeenCalledWith({ user_states: { 'js:q1': { state: 'know', updatedAt: 1 } } });
+    expect(hoisted.chromeStorageSet).toHaveBeenCalledWith('user_states', { 'js:q1': { state: 'know', updatedAt: 1 } });
     const types = hoisted.dispatches.map((d) => d.type);
     expect(types).toContain('REPLACE_USER_STATES');
   });
@@ -176,9 +177,7 @@ describe('importBackupFromFile', () => {
       JSON.stringify({ gamification: { streak: 1, xp: 5, lastActiveDate: '2026-07-20' } }),
     );
     await importBackupFromFile(f);
-    expect(hoisted.chromeStorageSet).toHaveBeenCalledWith({
-      gamification: { streak: 1, xp: 5, lastActiveDate: '2026-07-20' },
-    });
+    expect(hoisted.chromeStorageSet).toHaveBeenCalledWith('gamification', { streak: 1, xp: 5, lastActiveDate: '2026-07-20' });
     const types = hoisted.dispatches.map((d) => d.type);
     expect(types).toContain('SET_GAMIFICATION');
   });

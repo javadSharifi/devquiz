@@ -11,6 +11,7 @@ export {
   getLocal,
   getSync,
   locked,
+  removeLocal,
   setLocal,
   setSync,
 } from './services/storage/chrome-storage.js';

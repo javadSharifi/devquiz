@@ -6,6 +6,7 @@
 import { store } from '../state.js';
 import { faNum } from '../types.js';
 import { h } from '../components/hyperscript.js';
+import { platform } from '../platform/index.js';
 
 let headerEl: HTMLElement | null = null;
 let streakValueEl: HTMLElement | null = null;
@@ -66,7 +67,7 @@ function fullscreenToggle(): HTMLElement {
         window.close();
         return;
       }
-      chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html?fs=1') });
+      void platform.tabs.create({ url: platform.runtime.getURL('popup/popup.html?fs=1') });
       window.close();
     },
   }, isFs ? '✕' : '⛶');

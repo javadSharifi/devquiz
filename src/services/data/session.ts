@@ -4,7 +4,7 @@
  * ============================================================ */
 
 import { type SessionSnapshot } from '../../types.js';
-import { getLocal, setLocal } from '../storage/chrome-storage.js';
+import { getLocal, removeLocal, setLocal } from '../storage/chrome-storage.js';
 
 export function getSession(): Promise<SessionSnapshot | null> {
   return getLocal<SessionSnapshot | null>('session', null);
@@ -15,5 +15,5 @@ export function saveSession(s: SessionSnapshot): Promise<void> {
 }
 
 export function clearSession(): Promise<void> {
-  return chrome.storage.local.remove('session');
+  return removeLocal('session');
 }

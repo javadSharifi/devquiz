@@ -1,10 +1,15 @@
 /* ============================================================
  * DevQuiz — services/storage/chrome-storage.ts
- * Thin typed wrapper around chrome.storage.local / chrome.storage.sync
- * plus a single shared Mutex for read-modify-write serialization.
+ * Thin typed wrapper around the platform storage adapters
+ * (chrome.storage.* / browser.storage.* / localStorage) plus
+ * a single shared Mutex for read-modify-write serialization.
+ * The mutex guards in-memory read-modify-write sequences; the
+ * underlying storage call is delegated to the active platform
+ * adapter so the same code runs in Chrome, Firefox, and web.
  * ============================================================ */
 
 import { Mutex } from './mutex.js';
+import { platform } from '../../platform/index.js';
 
 const mutex = new Mutex();
 
@@ -17,22 +22,22 @@ export async function locked<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-export async function getLocal<T>(key: string, fallback: T): Promise<T> {
-  const res = await chrome.storage.local.get(key);
-  const val = res[key] as T | undefined;
-  return val === undefined ? fallback : val;
+export function getLocal<T>(key: string, fallback: T): Promise<T> {
+  return platform.storage.local.get<T>(key, fallback);
 }
 
-export async function setLocal(key: string, value: unknown): Promise<void> {
-  await chrome.storage.local.set({ [key]: value });
+export function setLocal(key: string, value: unknown): Promise<void> {
+  return platform.storage.local.set(key, value);
 }
 
-export async function getSync<T>(key: string, fallback: T): Promise<T> {
-  const res = await chrome.storage.sync.get(key);
-  const val = res[key] as T | undefined;
-  return val === undefined ? fallback : val;
+export function removeLocal(key: string): Promise<void> {
+  return platform.storage.local.remove(key);
 }
 
-export async function setSync(key: string, value: unknown): Promise<void> {
-  await chrome.storage.sync.set({ [key]: value });
+export function getSync<T>(key: string, fallback: T): Promise<T> {
+  return platform.storage.sync.get<T>(key, fallback);
+}
+
+export function setSync(key: string, value: unknown): Promise<void> {
+  return platform.storage.sync.set(key, value);
 }

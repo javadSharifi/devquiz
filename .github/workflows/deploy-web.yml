@@ -1,0 +1,94 @@
+# ============================================================
+# DevQuiz — GitHub Pages deploy (web build only)
+#
+# Trigger: push to main, or manual dispatch.
+# Pipeline: checkout → setup-node → pnpm install → build:web →
+#           upload artifact → deploy to GitHub Pages.
+#
+# Site types this workflow supports:
+#   * Project site: <user>.github.io/<repo>   (default)
+#   * User site:    <user>.github.io          (set the repo to
+#                   <user>.github.io and Pages source to GitHub
+#                   Actions; no other change needed here)
+#
+# First-time setup (one click in the GitHub UI):
+#   Settings → Pages → Source = "GitHub Actions"
+# ============================================================
+
+name: Deploy web to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'build/**'
+      - 'styles/**'
+      - 'assets/**'
+      - 'vendor/**'
+      - '.github/workflows/deploy-web.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+# Cancel any in-flight deploy when a new push lands.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+# Least-privilege: Pages deploys need id-token + contents:read.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Don't burn minutes on forks / PRs.
+if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+jobs:
+  build:
+    name: Build web bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web
+        run: pnpm run build:web
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p pages-out
+          cp -R dist/web/. pages-out/
+          # The Pages artifact MUST be rooted at / and contain
+          # index.html. `dist/web/` already satisfies that.
+          ls -la pages-out
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages-out
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

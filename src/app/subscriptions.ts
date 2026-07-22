@@ -19,6 +19,7 @@ import { applyFlip } from '../components/flashcard.js';
 import { renderMain, renderNav, patchGameCard, type AppShell } from './router.js';
 import { updateHeaderStats } from './header.js';
 import { applyFontSize, applyTheme } from './theme.js';
+import { platform } from '../platform/index.js';
 
 export function installSubscriptions(shell: AppShell): void {
   store.subscribe((state, prev) => {
@@ -33,7 +34,7 @@ export function installSubscriptions(shell: AppShell): void {
     if (state.activeTab !== prev.activeTab) {
       renderNav(shell);
       if (state.activeTab === 'settings') {
-        void chrome.action.setBadgeText({ text: '' });
+        void platform.action.setBadgeText({ text: '' });
       }
       renderMain(state, shell);
       return;
