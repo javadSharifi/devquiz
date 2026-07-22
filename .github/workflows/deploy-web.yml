@@ -42,9 +42,6 @@ permissions:
   pages: write
   id-token: write
 
-# Don't burn minutes on forks / PRs.
-if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-
 jobs:
   build:
     name: Build web bundle
