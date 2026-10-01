@@ -29,9 +29,11 @@
 
 @import url('./features/game.css');
 @import url('./features/settings.css');
+@import url('./features/account.css');
 @import url('./features/review.css');
 @import url('./features/add.css');
 @import url('./features/all-games.css');
+@import url('./features/search.css');
 @import url('./features/onboarding.css');
 
 @import url('./reduced-motion.css');

@@ -14,6 +14,7 @@ import {
   setFontSize,
   setTheme,
   setUserStateEntry,
+  triggerDebouncedCloudSync,
 } from '../storage.js';
 import { applyFlip } from '../components/flashcard.js';
 import { renderMain, renderNav, patchGameCard, type AppShell } from './router.js';
@@ -23,14 +24,18 @@ import { platform } from '../platform/index.js';
 
 export function installSubscriptions(shell: AppShell): void {
   store.subscribe((state, prev) => {
-    if (state.fontSize !== prev.fontSize && state.activeTab === 'settings') {
+    if (
+      (state.fontSize !== prev.fontSize ||
+        state.theme !== prev.theme ||
+        state.authUser !== prev.authUser ||
+        state.isSyncing !== prev.isSyncing ||
+        state.lastSyncedAt !== prev.lastSyncedAt) &&
+      state.activeTab === 'settings'
+    ) {
       renderMain(state, shell);
       return;
     }
-    if (state.theme !== prev.theme && state.activeTab === 'settings') {
-      renderMain(state, shell);
-      return;
-    }
+
     if (state.activeTab !== prev.activeTab) {
       renderNav(shell);
       if (state.activeTab === 'settings') {
@@ -84,10 +89,13 @@ export function installSubscriptions(shell: AppShell): void {
     switch (action.type) {
       case 'SET_USER_STATE':
         void setUserStateEntry(action.key, action.value);
+        triggerDebouncedCloudSync();
         break;
       case 'SET_GAMIFICATION':
         void saveGamification(action.gamification);
+        triggerDebouncedCloudSync();
         break;
+
       case 'ADD_CUSTOM_QUESTION':
         void addCustomQuestion(action.question);
         break;

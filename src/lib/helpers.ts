@@ -1,5 +1,6 @@
 import { h, svgIcon } from '../ui.js';
 import type { QuestionLevel } from '../types.js';
+import { faNum, getPriorityLevel, getPriorityPercent } from '../types.js';
 
 export const LEVEL_LABEL: Record<QuestionLevel, string> = {
   junior: 'جونیور',
@@ -68,3 +69,23 @@ export function statChip(icon: string, label: string, value: string): HTMLElemen
     h('span', { className: 'stat-chip__label' }, label),
   );
 }
+
+export function renderPriorityBadge(
+  priority?: number | string | null,
+  opts?: { compact?: boolean },
+): HTMLElement | null {
+  const pct = getPriorityPercent(priority);
+  if (pct === null) return null;
+  const level = getPriorityLevel(pct);
+  const text = opts?.compact ? `${faNum(pct)}٪` : `🎯 ${faNum(pct)}٪ اهمیت`;
+  return h(
+    'span',
+    {
+      className: `priority-badge priority-badge--${level}${opts?.compact ? ' priority-badge--compact' : ''}`,
+      title: `درصد اهمیت: ${faNum(pct)}٪`,
+      attrs: { 'aria-label': `درصد اهمیت: ${faNum(pct)}٪` },
+    },
+    text,
+  );
+}
+

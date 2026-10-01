@@ -11,6 +11,38 @@
 .view--all-games {
   gap: 14px;
 }
+.all-games__search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-faint);
+  font-family: inherit;
+  font-size: var(--fs-13);
+  cursor: pointer;
+  transition: all var(--ease);
+}
+.all-games__search-bar:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: var(--glow-accent);
+}
+.all-games__search-text {
+  flex: 1 1 auto;
+  text-align: right;
+}
+.all-games__search-badge {
+  font-size: var(--fs-10_5);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(124, 92, 255, 0.15);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
 .all-games__recent {
   display: flex;
   flex-direction: column;

@@ -23,6 +23,7 @@ export function renderHeader(): void {
   xpValueEl = h('span', { className: 'stat__value' }, faNum(gamification.xp));
   headerEl.replaceChildren(
     h('div', { className: 'brand' }, h('span', { className: 'brand__logo', attrs: { 'aria-hidden': 'true' } }, '⚡'), 'دِوکوئیز'),
+    searchButton(),
     ...(platform.isExtension ? [fullscreenToggle()] : []),
     h(
       'div',
@@ -53,6 +54,22 @@ export function updateHeaderStats(): void {
     void xpValueEl.parentElement?.offsetWidth;
     xpValueEl.parentElement?.classList.add('stat--pulse');
   }
+}
+
+function searchButton(): HTMLElement {
+  return h(
+    'button',
+    {
+      className: 'header-search-btn',
+      type: 'button',
+      title: 'جستجو در همه سؤال‌ها (Ctrl+K / /)',
+      attrs: { 'aria-label': 'جستجو در همه سؤال‌ها' },
+      onClick: () => {
+        store.dispatch({ type: 'SET_TAB', tab: 'search' });
+      },
+    },
+    '🔍',
+  );
 }
 
 function fullscreenToggle(): HTMLElement {

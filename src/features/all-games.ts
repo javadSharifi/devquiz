@@ -18,6 +18,21 @@ export function renderAllGames(state: AppState): HTMLElement {
   const wrap = h('div', { className: 'view view--all-games' });
   wrap.appendChild(h('h2', { className: 'view__title' }, 'همه بازی‌ها'));
 
+  wrap.appendChild(
+    h(
+      'button',
+      {
+        className: 'all-games__search-bar glass',
+        type: 'button',
+        attrs: { 'aria-label': 'جستجو در تمام سؤال‌ها' },
+        onClick: () => store.dispatch({ type: 'SET_TAB', tab: 'search' }),
+      },
+      h('span', { className: 'all-games__search-icon', attrs: { 'aria-hidden': 'true' } }, '🔍'),
+      h('span', { className: 'all-games__search-text' }, 'جستجو در بین تمام سؤالات و پاسخ‌ها…'),
+      h('span', { className: 'all-games__search-badge' }, 'همه JSONها'),
+    ),
+  );
+
   if (state.catalog.length === 0) {
     wrap.appendChild(emptyState('📦', 'در حال دریافت فهرست…', ''));
     return wrap;

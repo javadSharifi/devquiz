@@ -9,8 +9,9 @@
  * ============================================================ */
 
 import { isTopicCatalog, type TopicCatalog } from '../../types.js';
+import { getApiBaseUrl } from './auth-api.js';
 
-/** Master catalog URL (use exactly — see build spec §8). */
+/** Master catalog URL (fallback to GitHub gist if edge is unreachable). */
 export const CATALOG_URL =
   'https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/catalog.json';
 
@@ -50,6 +51,14 @@ export async function fetchValidatedJson<T>(
   }
 }
 
-export function fetchCatalog(): Promise<TopicCatalog> {
-  return fetchValidatedJson(CATALOG_URL, isTopicCatalog);
+export async function fetchCatalog(): Promise<TopicCatalog> {
+  try {
+    const baseUrl = await getApiBaseUrl();
+    const edgeCatalogUrl = `${baseUrl}/api/topics/catalog`;
+    return await fetchValidatedJson(edgeCatalogUrl, isTopicCatalog);
+  } catch {
+    // Graceful fallback to gist catalog
+    return fetchValidatedJson(CATALOG_URL, isTopicCatalog);
+  }
 }
+

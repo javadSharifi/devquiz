@@ -79,7 +79,18 @@ export class FakeElement extends FakeNode {
   href = '';
   tabIndex = 0;
   innerHTML = '';
-  textContent = '';
+  private _textContent?: string;
+  get textContent(): string {
+    if (this._textContent !== undefined) return this._textContent;
+    if (this.childNodes.length > 0) {
+      return this.childNodes.map((c) => (c as any).textContent ?? '').join('');
+    }
+    return '';
+  }
+  set textContent(v: string) {
+    this._textContent = v;
+    this.childNodes = [];
+  }
   style = new Proxy({} as StyleRecord, styleProxyHandler);
   private _datasetTarget: StyleRecord = {};
   dataset: Record<string, string | number> = new Proxy({} as StyleRecord, {
@@ -130,6 +141,9 @@ export class FakeElement extends FakeNode {
   }
   getAttribute(name: string): string | null {
     return this._attrs.has(name) ? this._attrs.get(name)! : null;
+  }
+  getAttributeNames(): string[] {
+    return [...this._attrs.keys()];
   }
   hasAttribute(name: string): boolean {
     return this._attrs.has(name);
@@ -194,6 +208,7 @@ export function installDomStub(): DomStub {
     createElement: (tag: string) => makeEl(tag),
     createElementNS: (_ns: string, tag: string) => makeEl(tag, true),
     createTextNode: (text: string) => new FakeTextNode(text),
+    createDocumentFragment: () => new FakeElement(),
     body,
     documentElement,
   };

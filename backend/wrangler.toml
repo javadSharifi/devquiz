@@ -1,0 +1,12 @@
+name = "devquiz-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[vars]
+JWT_SECRET = "devquiz-super-secret-key-change-in-production"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "devquiz-db"
+database_id = "23c55a0b-4d76-4931-9328-be5a326b78b2"
+

@@ -15,6 +15,8 @@ import {
   isTopicCatalog,
   isCustomQuestion,
   isCustomQuestionArray,
+  getPriorityPercent,
+  getPriorityLevel,
 } from '../src/types.js';
 
 describe('compareVersions', () => {
@@ -180,6 +182,12 @@ describe('isQuestion', () => {
     expect(isQuestion({ id: 'q1', question: '?', answer: '!', isCustom: true })).toBe(true);
   });
 
+  it('accepts question with priority', () => {
+    expect(isQuestion({ id: 'q1', question: '?', answer: '!', priority: 8 })).toBe(true);
+    expect(isQuestion({ id: 'q1', question: '?', answer: '!', priority: 9.5 })).toBe(true);
+    expect(isQuestion({ id: 'q1', question: '?', answer: '!', priority: '10' })).toBe(true);
+  });
+
   it('rejects missing fields', () => {
     expect(isQuestion({})).toBe(false);
     expect(isQuestion({ id: 'q1', question: '?' })).toBe(false);
@@ -329,3 +337,47 @@ describe('isCustomQuestionArray', () => {
     expect(isCustomQuestionArray(null)).toBe(false);
   });
 });
+
+describe('getPriorityPercent', () => {
+  it('converts 1-10 priority numbers to percentages', () => {
+    expect(getPriorityPercent(10)).toBe(100);
+    expect(getPriorityPercent(9.5)).toBe(95);
+    expect(getPriorityPercent(8)).toBe(80);
+    expect(getPriorityPercent(5)).toBe(50);
+    expect(getPriorityPercent(1)).toBe(10);
+  });
+
+  it('handles percentage values already > 10', () => {
+    expect(getPriorityPercent(85)).toBe(85);
+    expect(getPriorityPercent(100)).toBe(100);
+  });
+
+  it('handles string input gracefully', () => {
+    expect(getPriorityPercent('8')).toBe(80);
+    expect(getPriorityPercent('9.5')).toBe(95);
+  });
+
+  it('returns null for missing, null or invalid priorities', () => {
+    expect(getPriorityPercent(undefined)).toBeNull();
+    expect(getPriorityPercent(null)).toBeNull();
+    expect(getPriorityPercent('abc')).toBeNull();
+  });
+});
+
+describe('getPriorityLevel', () => {
+  it('returns high for pct >= 80', () => {
+    expect(getPriorityLevel(100)).toBe('high');
+    expect(getPriorityLevel(80)).toBe('high');
+  });
+
+  it('returns mid for pct between 50 and 79', () => {
+    expect(getPriorityLevel(79)).toBe('mid');
+    expect(getPriorityLevel(50)).toBe('mid');
+  });
+
+  it('returns low for pct < 50', () => {
+    expect(getPriorityLevel(49)).toBe('low');
+    expect(getPriorityLevel(10)).toBe('low');
+  });
+});
+

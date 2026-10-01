@@ -2,7 +2,7 @@ import { buildFlashcard } from '../components/flashcard.js';
 import { store } from '../state.js';
 import { findQuestion, getMergedTopic } from '../lib/topic-utils.js';
 import { answerRandomCard as undoAnswerRandomCard, XP_PER_STATE, setLastFlashcard } from '../lib/undo.js';
-import { backButton } from '../lib/helpers.js';
+import { backButton, renderPriorityBadge } from '../lib/helpers.js';
 import type { Category, Question } from '../types.js';
 import type { AppState } from '../state.js';
 import { stateKey } from '../types.js';
@@ -129,6 +129,7 @@ function reviewItem(state: AppState, q: Question, cat: Category, topicId: string
     },
     h('span', { className: 'review-item__cat', attrs: { 'aria-hidden': 'true' } }, cat.icon),
     h('span', { className: 'review-item__q' }, q.question),
+    renderPriorityBadge(q.priority, { compact: true }),
     h('span', { className: 'review-item__chev', attrs: { 'aria-hidden': 'true' } }, '‹'),
   );
   const item = h('div', { className: 'review-item glass' }, toggle, body);

@@ -26,7 +26,34 @@ function mountShell(): AppShell | null {
   return { headerEl, navEl, mainEl, liveRegion };
 }
 
+async function preseedLocalTopics(): Promise<void> {
+  try {
+    const raw = window.localStorage.getItem('devquiz.web.local.topics');
+    if (!raw || raw === '{}') {
+      const [gitRes, catalogRes] = await Promise.all([
+        fetch('./data/git.json').catch(() => null),
+        fetch('./data/catalog.json').catch(() => null),
+      ]);
+      if (gitRes && gitRes.ok) {
+        const git = await gitRes.json();
+        window.localStorage.setItem('devquiz.web.local.topics', JSON.stringify({ git }));
+        window.localStorage.setItem('devquiz.web.local.downloaded_versions', JSON.stringify({ git: '1.2.0' }));
+        window.localStorage.setItem('devquiz.web.local.active_topic_id', JSON.stringify('git'));
+      }
+      if (catalogRes && catalogRes.ok) {
+        const cat = await catalogRes.json();
+        if (cat?.topics) {
+          window.localStorage.setItem('devquiz.web.local.catalog', JSON.stringify(cat.topics));
+        }
+      }
+    }
+  } catch {
+    // Non-fatal
+  }
+}
+
 async function main(): Promise<void> {
+  await preseedLocalTopics();
   const shell = mountShell();
   if (!shell) return;
   await bootstrap(shell);

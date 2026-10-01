@@ -10,7 +10,8 @@
   height: var(--nav-h);
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   border-top: 1px solid var(--border);
   background: var(--nav-bg);
   backdrop-filter: blur(12px);

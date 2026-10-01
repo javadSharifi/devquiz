@@ -87,6 +87,10 @@ async function copyStatic(name) {
     await cp(resolve(ROOT, 'styles'), resolve(staticDir, 'styles'), { recursive: true });
     await cp(resolve(ROOT, 'assets'), resolve(staticDir, 'assets'), { recursive: true });
     await cp(resolve(ROOT, 'vendor'), resolve(staticDir, 'vendor'), { recursive: true });
+    const localData = resolve(ROOT, '../b54997f0fdbdf2b1d34f69be116cedfb');
+    if (existsSync(localData)) {
+      await cp(localData, resolve(staticDir, 'data'), { recursive: true });
+    }
     await writeFile(resolve(staticDir, 'index.html'), renderWebIndex(), 'utf8');
     // Disable Jekyll so files starting with _ (e.g. vendor/) and
     // dotfiles in the dist tree are served verbatim.
@@ -131,9 +135,14 @@ const targets = target === 'all' ? ['chrome', 'firefox', 'web'] : [target];
 
 if (!watch) {
   for (const t of targets) {
-    await rm(resolve(ROOT, `dist/${t}`), { recursive: true, force: true });
+    try {
+      await rm(resolve(ROOT, `dist/${t}`), { recursive: true, force: true });
+    } catch {
+      // Ignore EBUSY when dev server holds lock on Windows
+    }
   }
 }
+
 
 for (const t of targets) {
   if (t === 'chrome' || t === 'firefox' || t === 'web') {

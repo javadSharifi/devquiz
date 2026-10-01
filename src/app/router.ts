@@ -12,6 +12,7 @@ import { renderAllGames } from '../features/all-games.js';
 import { renderReview } from '../features/review.js';
 import { renderAdd } from '../features/add.js';
 import { renderSettings } from '../features/settings.js';
+import { renderSearch } from '../features/search.js';
 import { renderNoTopics } from './picker/first-run-picker.js';
 
 export interface AppShell {
@@ -21,11 +22,12 @@ export interface AppShell {
   liveRegion: HTMLElement;
 }
 
-export type Tab = 'game' | 'all-games' | 'review' | 'add' | 'settings';
+export type Tab = 'game' | 'all-games' | 'review' | 'search' | 'add' | 'settings';
 
 export const NAV_ITEMS: { tab: Tab; label: string; icon: string }[] = [
   { tab: 'game', label: 'بازی', icon: 'M6 12h4m-2-2v4m8-3h.01M18 13h.01M7 5h10a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4z' },
   { tab: 'all-games', label: 'همه بازی‌ها', icon: 'M4 5h16M4 12h16M4 19h16' },
+  { tab: 'search', label: 'جستجو', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
   { tab: 'review', label: 'مرور', icon: 'M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16l-8-4-8 4V5z' },
   { tab: 'add', label: 'اضافه', icon: 'M12 5v14M5 12h14' },
   { tab: 'settings', label: 'تنظیمات', icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.4-3a7.4 7.4 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-2-1.2L14.5 3h-5l-.4 2.6a7.6 7.6 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 2 1.2l.4 2.6h5l.4-2.6a7.6 7.6 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.07-.4.1-.8.1-1.2z' },
@@ -64,6 +66,9 @@ export function renderMain(state: AppState, shell: AppShell): void {
           break;
         case 'all-games':
           view = renderAllGames(state);
+          break;
+        case 'search':
+          view = renderSearch(state);
           break;
         case 'review':
           view = renderReview(state);

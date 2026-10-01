@@ -1,6 +1,7 @@
 import { saveSession } from './storage.js';
 import type {
   Action,
+  AuthUser,
   CustomQuestion,
   FontSize,
   Gamification,
@@ -34,6 +35,10 @@ export interface AppState {
   catalog: TopicCatalogItem[];
   fontSize: FontSize;
   theme: Theme;
+  authUser: AuthUser | null;
+  authToken: string | null;
+  isSyncing: boolean;
+  lastSyncedAt: number | null;
 }
 
 const initialState: AppState = {
@@ -57,7 +62,12 @@ const initialState: AppState = {
   catalog: [],
   fontSize: 'medium' as FontSize,
   theme: 'dark' as Theme,
+  authUser: null,
+  authToken: null,
+  isSyncing: false,
+  lastSyncedAt: null,
 };
+
 
 export function reduce(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -132,7 +142,14 @@ export function reduce(state: AppState, action: Action): AppState {
     case 'SET_RECENT_TOPICS':
       return { ...state, recentTopics: action.topicIds };
     case 'HYDRATE':
-      return { ...state, ...action.payload, recentTopics: action.payload.recentTopics ?? state.recentTopics };
+      return {
+        ...state,
+        ...action.payload,
+        recentTopics: action.payload.recentTopics ?? state.recentTopics,
+        authUser: action.payload.authUser !== undefined ? action.payload.authUser : state.authUser,
+        authToken: action.payload.authToken !== undefined ? action.payload.authToken : state.authToken,
+        lastSyncedAt: action.payload.lastSyncedAt !== undefined ? action.payload.lastSyncedAt : state.lastSyncedAt,
+      };
     case 'SET_USER_STATE': {
       const next = { ...state.userStates };
       if (action.value === null) delete next[action.key];
@@ -171,6 +188,14 @@ export function reduce(state: AppState, action: Action): AppState {
       return { ...state, fontSize: action.fontSize };
     case 'SET_THEME':
       return { ...state, theme: action.theme };
+    case 'SET_AUTH':
+      return { ...state, authUser: action.user, authToken: action.token };
+    case 'SET_SYNC_STATUS':
+      return {
+        ...state,
+        isSyncing: action.isSyncing,
+        lastSyncedAt: action.lastSyncedAt !== undefined ? action.lastSyncedAt : state.lastSyncedAt,
+      };
   }
 }
 

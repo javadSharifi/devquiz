@@ -5,6 +5,7 @@ import { answerCurrentCard, XP_PER_STATE, setLastFlashcard } from '../lib/undo.j
 import { backButton, statChip, topicIconEl } from '../lib/helpers.js';
 import { viewport, patchViewport } from '../lib/dom-patch.js';
 import { renderCategoryList } from './game/cat-list.js';
+import { renderAllTopicQuestions } from './game/all-topic-questions.js';
 import type { QuestionLevel, Topic } from '../types.js';
 import type { AppState } from '../state.js';
 import { faNum } from '../types.js';
@@ -38,6 +39,13 @@ export function renderGame(state: AppState): HTMLElement {
     const switcher = renderTopicSwitcher(state);
     if (switcher) wrap.prepend(switcher);
     return wrap;
+  }
+  if (state.selectedCategoryId === '__ALL__') {
+    const finishedSession = state.queue.length === 0 && state.sessionAnswered > 0;
+    if (state.currentQuestionIndex < state.queue.length || finishedSession) {
+      return renderFlashcardScreen(state, topic, state.selectedCategoryId);
+    }
+    return renderAllTopicQuestions(state, topic);
   }
   const finishedSession = state.queue.length === 0 && state.sessionAnswered > 0;
   if (state.currentQuestionIndex < state.queue.length || finishedSession) {
@@ -118,7 +126,35 @@ function renderLevelPicker(state: AppState, topic: Topic): HTMLElement {
     list.appendChild(card);
   }
   wrap.appendChild(list);
+  wrap.appendChild(buildShowAllQuestionsButton(topic));
   return wrap;
+}
+
+function buildShowAllQuestionsButton(topic: Topic): HTMLElement {
+  const total = topic.categories.reduce((acc, c) => acc + c.questions.length, 0);
+  return h(
+    'button',
+    {
+      className: 'all-questions-entry-btn glass',
+      type: 'button',
+      attrs: { 'aria-label': 'نمایش همه سؤال‌ها بر اساس درصد اهمیت' },
+      onClick: () => {
+        store.dispatch({ type: 'SELECT_CATEGORY', categoryId: '__ALL__', queue: [] });
+      },
+    },
+    h('span', { className: 'all-questions-entry-btn__icon', attrs: { 'aria-hidden': 'true' } }, '📋'),
+    h(
+      'div',
+      { className: 'all-questions-entry-btn__content' },
+      h('span', { className: 'all-questions-entry-btn__title' }, 'نمایش همه سؤال‌ها'),
+      h(
+        'span',
+        { className: 'all-questions-entry-btn__sub' },
+        `تمام ${faNum(total)} سؤال مرتب‌شده بر اساس درصد اهمیت`,
+      ),
+    ),
+    h('span', { className: 'all-questions-entry-btn__chev', attrs: { 'aria-hidden': 'true' } }, '‹'),
+  );
 }
 
 function renderAllCategories(state: AppState, topic: Topic): HTMLElement {
@@ -151,6 +187,8 @@ function renderAllCategories(state: AppState, topic: Topic): HTMLElement {
       ),
     );
   }
+
+  wrap.appendChild(buildShowAllQuestionsButton(topic));
 
   const visibleCats = state.selectedLevel === null
     ? topic.categories
@@ -191,12 +229,13 @@ function renderFlashcardScreen(
 ): HTMLElement {
   const wrap = h('div', { className: 'view view--card' });
   const cat = topic.categories.find((c) => c.id === categoryId);
+  const title = cat ? `${cat.icon} ${cat.title}` : (categoryId === '__ALL__' ? `📋 همه سؤال‌های ${topic.meta.title}` : '');
   wrap.appendChild(
     h(
       'div',
       { className: 'view-head' },
       backButton(() => store.dispatch({ type: 'SELECT_CATEGORY', categoryId: state.selectedCategoryId, queue: [] })),
-      h('h2', { className: 'view__title view__title--sm' }, cat ? `${cat.icon} ${cat.title}` : ''),
+      h('h2', { className: 'view__title view__title--sm' }, title),
     ),
   );
 
@@ -264,7 +303,7 @@ function renderCelebration(state: AppState, topic: Topic, categoryId: string): H
   box.append(
     h('div', { className: 'celebrate__badge', attrs: { 'aria-hidden': 'true' } }, '🏆'),
     h('h2', { className: 'celebrate__title' }, 'آفرین! تمومش کردی 🎉'),
-    h('p', { className: 'celebrate__sub' }, cat ? `دسته «${cat.title}»` : ''),
+    h('p', { className: 'celebrate__sub' }, cat ? `دسته «${cat.title}»` : (categoryId === '__ALL__' ? `همه سؤال‌های «${topic.meta.title}»` : '')),
     h(
       'div',
       { className: 'celebrate__stats' },
@@ -280,9 +319,14 @@ function renderCelebration(state: AppState, topic: Topic, categoryId: string): H
         'مرور دوباره',
         () => {
           const merged = getMergedTopic(state.activeTopicId);
-          const c = merged?.categories.find((x) => x.id === categoryId);
-          const all = c ? c.questions.map((x) => x.id) : [];
-          store.dispatch({ type: 'SELECT_CATEGORY', categoryId, queue: all });
+          if (categoryId === '__ALL__' && merged) {
+            const all = merged.categories.flatMap((x) => x.questions.map((q) => q.id));
+            store.dispatch({ type: 'SELECT_CATEGORY', categoryId, queue: all });
+          } else {
+            const c = merged?.categories.find((x) => x.id === categoryId);
+            const all = c ? c.questions.map((x) => x.id) : [];
+            store.dispatch({ type: 'SELECT_CATEGORY', categoryId, queue: all });
+          }
         },
         { variant: 'ghost' },
       ),

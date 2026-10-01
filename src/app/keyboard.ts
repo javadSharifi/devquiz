@@ -20,6 +20,17 @@ export function bindKeyboard(shell: AppShell): void {
     ) {
       return;
     }
+
+    if ((ev.key === '/' || (ev.key === 'k' && (ev.ctrlKey || ev.metaKey))) && !ev.shiftKey) {
+      ev.preventDefault();
+      store.dispatch({ type: 'SET_TAB', tab: 'search' });
+      setTimeout(() => {
+        const searchInput = shell.mainEl.querySelector<HTMLInputElement>('.search-bar__input');
+        searchInput?.focus();
+      }, 50);
+      return;
+    }
+
     const card = shell.mainEl.querySelector<HTMLElement>('.flashcard');
     if (!card) return;
     const s = store.getState();

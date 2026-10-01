@@ -15,7 +15,7 @@ import { categoryStats } from '../../lib/topic-utils.js';
 import { faNum, stateKey } from '../../types.js';
 import type { QuestionState, Topic } from '../../types.js';
 import type { AppState } from '../../state.js';
-import { backButton } from '../../lib/helpers.js';
+import { backButton, renderPriorityBadge } from '../../lib/helpers.js';
 import { button, emptyState, h, progressBar } from '../../ui.js';
 import { computeKnownCount, computeProgress, STATE_COLORS } from '../../lib/cat-list-stats.js';
 
@@ -104,6 +104,7 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
     const color = STATE_COLORS[currentState] ?? 'var(--danger)';
     const isDone = currentState === 'know';
     const body = h('div', { className: 'cat-list__body', attrs: { hidden: '' } });
+    const priorityBadge = renderPriorityBadge(q.priority, { compact: true });
     const toggle = h(
       'button',
       {
@@ -114,7 +115,7 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
           const hidden = body.hasAttribute('hidden');
           if (hidden) {
             body.replaceChildren();
-            body.appendChild(renderCardAnswer(q.answer));
+            body.appendChild(renderCardAnswer(q.answer, q.priority));
             body.appendChild(
               h('div', { className: 'cat-list__actions-inline' },
                 button('✅ بلدم', () => setQState('know'), { variant: 'soft', className: 'act act--know', ariaLabel: 'بلدم' }),
@@ -130,6 +131,7 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
         },
       },
       h('span', { className: 'cat-list__q' }, q.question),
+      priorityBadge,
     );
     const item = h('div', {
       className: `cat-list__item${isDone ? ' cat-list__item--done' : ''}`,
@@ -150,8 +152,13 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
   return wrap;
 }
 
-function renderCardAnswer(answer: string): HTMLElement {
+function renderCardAnswer(answer: string, priority?: number): HTMLElement {
   const req = document.createElement('div');
+  const badge = renderPriorityBadge(priority);
+  if (badge) {
+    const metaRow = h('div', { className: 'cat-list__answer-meta' }, badge);
+    req.appendChild(metaRow);
+  }
   req.appendChild(renderMarkdown(answer));
   return req;
 }

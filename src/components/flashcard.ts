@@ -2,15 +2,20 @@ import { renderMarkdown } from '../markdown.js';
 import { store } from '../state.js';
 import type { Question, QuestionState } from '../types.js';
 import { button, h } from '../ui.js';
+import { renderPriorityBadge } from '../lib/helpers.js';
 
 export function buildFlashcard(
   question: Question,
   flipped: boolean,
   onAnswer: (s: Exclude<QuestionState, 'unseen'>, btn: HTMLElement) => void,
 ): HTMLElement {
+  const priorityBadgeFront = renderPriorityBadge(question.priority);
+  const priorityBadgeBack = renderPriorityBadge(question.priority);
+
   const front = h(
     'div',
     { className: 'flashcard__face flashcard__face--front' },
+    priorityBadgeFront ? h('div', { className: 'face__header' }, priorityBadgeFront) : null,
     h('div', { className: 'face__body' }, renderMarkdown(question.question)),
     h('div', { className: 'face__foot', attrs: { 'aria-hidden': 'true' } }, '👆 پاسخ'),
   );
@@ -36,7 +41,12 @@ export function buildFlashcard(
   const back = h(
     'div',
     { className: 'flashcard__face flashcard__face--back' },
-    h('div', { className: 'face__badge face__badge--answer' }, 'پاسخ'),
+    h(
+      'div',
+      { className: 'face__header' },
+      h('div', { className: 'face__badge face__badge--answer' }, 'پاسخ'),
+      priorityBadgeBack,
+    ),
     h('div', { className: 'face__body face__body--answer' }, renderMarkdown(question.answer)),
     actions,
   );

@@ -16,9 +16,13 @@ import {
   getGamification,
   getRecentTopics,
   getSession,
+  getStoredLastSynced,
+  getStoredToken,
+  getStoredUser,
   getTheme,
   getTopics,
   getUserStates,
+  performFullSync,
   runMigrations,
   setActiveTopicId,
 } from '../storage.js';
@@ -33,7 +37,19 @@ import { installSubscriptions } from './subscriptions.js';
 export async function bootstrap(shell: AppShell): Promise<void> {
   try {
     await runMigrations();
-    const [topics, userStates, customQuestions, downloadedVersions, gamification, activeTopic, session, recentTopics] = await Promise.all([
+    const [
+      topics,
+      userStates,
+      customQuestions,
+      downloadedVersions,
+      gamification,
+      activeTopic,
+      session,
+      recentTopics,
+      authUser,
+      authToken,
+      lastSyncedAt,
+    ] = await Promise.all([
       getTopics(),
       getUserStates(),
       getCustomQuestions(),
@@ -42,9 +58,26 @@ export async function bootstrap(shell: AppShell): Promise<void> {
       getActiveTopicId(),
       getSession(),
       getRecentTopics(),
+      getStoredUser(),
+      getStoredToken(),
+      getStoredLastSynced(),
     ]);
 
-    store.dispatch({ type: 'HYDRATE', payload: { topics, userStates, customQuestions, downloadedVersions, gamification, recentTopics } });
+    store.dispatch({
+      type: 'HYDRATE',
+      payload: {
+        topics,
+        userStates,
+        customQuestions,
+        downloadedVersions,
+        gamification,
+        recentTopics,
+        authUser,
+        authToken,
+        lastSyncedAt,
+      },
+    });
+
 
     const topicIds = Object.keys(topics);
     let resolvedTopic = activeTopic && topics[activeTopic] ? activeTopic : (topicIds[0] ?? '');
@@ -99,4 +132,8 @@ export async function bootstrap(shell: AppShell): Promise<void> {
   });
 
   installSubscriptions(shell);
+  if (store.getState().authToken) {
+    void performFullSync().catch(() => {});
+  }
 }
+

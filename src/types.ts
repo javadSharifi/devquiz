@@ -7,7 +7,7 @@
 
 export type QuestionLevel = 'junior' | 'mid' | 'senior';
 export type QuestionState = 'unseen' | 'know' | 'want_to_learn' | 'skip';
-export type Tab = 'game' | 'all-games' | 'review' | 'add' | 'settings';
+export type Tab = 'game' | 'all-games' | 'review' | 'search' | 'add' | 'settings';
 export type FontSize = 'small' | 'medium' | 'large' | 'extra';
 export type Theme = 'dark' | 'light';
 
@@ -15,6 +15,7 @@ export interface Question {
   id: string;
   question: string;
   answer: string;
+  priority?: number;
   isCustom?: boolean;
 }
 
@@ -82,6 +83,18 @@ export interface SessionSnapshot {
   savedAt: number;
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  createdAt?: number;
+}
+
+export interface AuthSession {
+  user: AuthUser;
+  token: string;
+}
+
 /* ------------------------------------------------------------
  * Typed actions — a discriminated union; dispatch() accepts
  * ONLY these shapes, so there is no `any` anywhere in the
@@ -119,6 +132,9 @@ export type Action =
       downloadedVersions: Record<string, string>;
       gamification: Gamification;
       recentTopics?: string[];
+      authUser?: AuthUser | null;
+      authToken?: string | null;
+      lastSyncedAt?: number | null;
     }}
   | { type: 'SET_USER_STATE'; key: string; value: UserQuestionState | null }
   | { type: 'SET_GAMIFICATION'; gamification: Gamification }
@@ -128,11 +144,14 @@ export type Action =
   | { type: 'REPLACE_DOWNLOADED_VERSIONS'; versions: Record<string, string> }
   | { type: 'REPLACE_USER_STATES'; userStates: Record<string, UserQuestionState> }
   | { type: 'SET_FONT_SIZE'; fontSize: FontSize }
-  | { type: 'SET_THEME'; theme: Theme };
+  | { type: 'SET_THEME'; theme: Theme }
+  | { type: 'SET_AUTH'; user: AuthUser | null; token: string | null }
+  | { type: 'SET_SYNC_STATUS'; isSyncing: boolean; lastSyncedAt?: number | null };
 
 /* ------------------------------------------------------------
  * Runtime type guards
  * ------------------------------------------------------------ */
+
 
 function isRecord(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null && !Array.isArray(x);
@@ -159,7 +178,10 @@ export function isQuestion(x: unknown): x is Question {
     isRecord(x) &&
     isNonEmptyString(x['id']) &&
     typeof x['question'] === 'string' &&
-    typeof x['answer'] === 'string'
+    typeof x['answer'] === 'string' &&
+    (x['priority'] === undefined ||
+      typeof x['priority'] === 'number' ||
+      (typeof x['priority'] === 'string' && !isNaN(Number(x['priority']))))
   );
 }
 
@@ -197,10 +219,24 @@ export function isTopicCatalogItem(x: unknown): x is TopicCatalogItem {
     typeof x['description'] === 'string' &&
     isNonEmptyString(x['version']) &&
     isNonEmptyString(x['downloadUrl']) &&
-    /^https:\/\/gist\.githubusercontent\.com\//.test(x['downloadUrl'] as string) &&
+    (/^https:\/\/gist\.githubusercontent\.com\//.test(x['downloadUrl'] as string) ||
+      /^https:\/\/[a-zA-Z0-9_.-]+\.workers\.dev\//.test(x['downloadUrl'] as string) ||
+      /^http:\/\/127\.0\.0\.1:\d+\//.test(x['downloadUrl'] as string) ||
+      /^http:\/\/localhost:\d+\//.test(x['downloadUrl'] as string) ||
+      /^\.\//.test(x['downloadUrl'] as string)) &&
     (typeof x['icon'] === 'undefined' || typeof x['icon'] === 'string')
   );
 }
+
+export function isAuthUser(x: unknown): x is AuthUser {
+  return (
+    isRecord(x) &&
+    isNonEmptyString(x['id']) &&
+    isNonEmptyString(x['email']) &&
+    typeof x['name'] === 'string'
+  );
+}
+
 
 export function isTopicCatalog(x: unknown): x is TopicCatalog {
   return (
@@ -271,4 +307,31 @@ export function compareVersions(a: string, b: string): number {
     if (va !== vb) return va - vb;
   }
   return 0;
+}
+
+/**
+ * Convert priority (1-10 or 1-100 percentage) to integer percentage (0-100).
+ * Returns null if priority is undefined, null, or invalid.
+ */
+export function getPriorityPercent(priority?: number | string | null): number | null {
+  if (priority === undefined || priority === null) return null;
+  const p = typeof priority === 'string' ? parseFloat(priority) : priority;
+  if (!Number.isFinite(p)) return null;
+  if (p <= 0) return 0;
+  // If priority is on a 1-10 scale (common in data: e.g. 8 -> 80%, 9.5 -> 95%, 10 -> 100%)
+  if (p <= 10) {
+    return Math.min(100, Math.round(p * 10));
+  }
+  // Otherwise it's already a percentage (e.g. 85 -> 85%)
+  return Math.min(100, Math.round(p));
+}
+
+/**
+ * Return priority tier level for CSS styling:
+ * 'high' (>= 80%), 'mid' (>= 50%), 'low' (< 50%)
+ */
+export function getPriorityLevel(pct: number): 'high' | 'mid' | 'low' {
+  if (pct >= 80) return 'high';
+  if (pct >= 50) return 'mid';
+  return 'low';
 }

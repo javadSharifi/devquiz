@@ -57,3 +57,20 @@ export {
   saveSession,
   clearSession,
 } from './services/data/session.js';
+export {
+  getStoredToken,
+  getStoredUser,
+  getStoredLastSynced,
+  saveAuthSession,
+  clearAuthSession,
+  getApiBaseUrl,
+  setApiBaseUrl,
+  registerApi,
+  loginApi,
+  getMeApi,
+} from './services/api/auth-api.js';
+export {
+  performFullSync,
+  triggerDebouncedCloudSync,
+} from './services/data/sync-service.js';
+

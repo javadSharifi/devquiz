@@ -1,0 +1,210 @@
+/* ============================================================
+ * DevQuiz — features/search.css
+ * Global search UI: search input with clear button, filters row,
+ * topic/level selectors, result items with topic & importance badges,
+ * keyword highlighting, and answer accordion.
+ * ============================================================ */
+
+.view--search {
+  gap: 12px;
+}
+
+.search-download-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  border-color: rgba(124, 92, 255, 0.3);
+  background: rgba(124, 92, 255, 0.08);
+  font-size: var(--fs-12);
+  color: var(--text-dim);
+}
+
+.search-bar-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-bar__input {
+  width: 100%;
+  padding-inline-start: 14px;
+  padding-inline-end: 36px;
+  font-size: var(--fs-14);
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transition: all var(--ease);
+}
+
+.search-bar__input:focus {
+  border-color: var(--accent-strong);
+  box-shadow: var(--glow-accent);
+}
+
+.search-bar__clear {
+  position: absolute;
+  inset-inline-end: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-faint);
+  font-size: var(--fs-11);
+  cursor: pointer;
+  transition: all var(--ease);
+}
+
+.search-bar__clear:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.search-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.search-select {
+  flex: 1 1 auto;
+  min-width: 110px;
+  padding: 6px 10px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--fs-12);
+  cursor: pointer;
+  transition: border-color var(--ease);
+}
+
+.search-select:focus-visible {
+  border-color: var(--accent);
+}
+
+.search-select--sort {
+  min-width: 160px;
+}
+
+.search-count-bar {
+  font-size: var(--fs-12);
+  color: var(--text-faint);
+  font-weight: 600;
+  margin-top: -2px;
+}
+
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.search-item {
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all var(--ease);
+}
+
+.search-item:hover {
+  border-color: rgba(124, 92, 255, 0.35);
+}
+
+.search-item__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: right;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.search-item__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.search-item__topic-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(124, 92, 255, 0.12);
+  border: 1px solid rgba(124, 92, 255, 0.28);
+  color: var(--accent-strong);
+  font-size: var(--fs-11);
+  font-weight: 700;
+}
+
+.search-item__cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  font-size: var(--fs-11);
+}
+
+.search-item__q {
+  font-size: var(--fs-13_5);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.search-item__body {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.search-item__answer-badge {
+  margin-bottom: 8px;
+}
+
+.search-highlight {
+  background: rgba(255, 196, 77, 0.35);
+  color: #fff;
+  border-radius: 2px;
+  padding: 0 2px;
+  font-weight: 700;
+}
+
+.search-more-note {
+  text-align: center;
+  font-size: var(--fs-11);
+  color: var(--text-faint);
+  padding: 8px;
+  margin: 0;
+}
+
+.act--goto {
+  color: var(--accent-strong);
+  border-color: rgba(124, 92, 255, 0.3);
+}
+
+.act--goto:hover {
+  background: rgba(124, 92, 255, 0.15);
+}

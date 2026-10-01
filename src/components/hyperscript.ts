@@ -17,7 +17,7 @@ export interface HProps extends EventHandlers {
   id?: string;
   dataset?: Record<string, string>;
   attrs?: Record<string, string>;
-  style?: Partial<CSSStyleDeclaration>;
+  style?: string | Partial<CSSStyleDeclaration>;
   disabled?: boolean;
   value?: string;
   type?: string;
@@ -60,7 +60,12 @@ export function h<K extends keyof HTMLElementTagNameMap>(
           el.setAttribute(ak, av);
         }
       } else if (key === 'style') {
-        Object.assign(el.style, val);
+        if (typeof val === 'string') {
+          el.style.cssText = val;
+        } else if (typeof val === 'object' && val !== null) {
+          Object.assign(el.style, val);
+        }
+
       } else if (key.startsWith('on') && typeof val === 'function') {
         el.addEventListener(
           key.slice(2).toLowerCase(),
