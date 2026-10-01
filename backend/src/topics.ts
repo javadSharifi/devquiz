@@ -17,6 +17,8 @@ import csData from '../data/cs_fundamentals.json';
 import devtoolsData from '../data/devtools_web.json';
 import restApiData from '../data/rest_api.json';
 import seoData from '../data/seo.json';
+import designSystemsData from '../data/design_systems.json';
+import uxToolsData from '../data/ux_tools.json';
 
 const TOPIC_STORE: Record<string, unknown> = {
   git: gitData,
@@ -31,6 +33,8 @@ const TOPIC_STORE: Record<string, unknown> = {
   devtools_web: devtoolsData,
   rest_api: restApiData,
   seo: seoData,
+  design_systems: designSystemsData,
+  ux_tools: uxToolsData,
 };
 
 export function getCatalog(baseUrl: string): { topics: unknown[] } {

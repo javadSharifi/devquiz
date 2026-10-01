@@ -95,6 +95,22 @@
       "version": "1.0.0",
       "icon": "https://cdn.simpleicons.org/googlechrome/4285F4",
       "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/devtools_web.json"
+    },
+    {
+      "id": "design_systems",
+      "title": "سیستم‌های طراحی (Design Systems)",
+      "description": "مفاهیم سیستم‌های طراحی، دیزاین توکن‌ها، کامپوننت‌ها، الگوها، مستندسازی و ابزارها.",
+      "version": "1.0.0",
+      "icon": "https://cdn.simpleicons.org/figma/F24E1E",
+      "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/design_systems.json"
+    },
+    {
+      "id": "ux_tools",
+      "title": "ابزارهای تجربه کاربری (UX Tools)",
+      "description": "ابزارهای پژوهش، طراحی، پروتوتایپ، تست کاربردپذیری و آنالیتیکس تجربه کاربری.",
+      "version": "1.0.0",
+      "icon": "https://cdn.simpleicons.org/framer/0055FF",
+      "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/ux_tools.json"
     }
   ]
-}
+}
