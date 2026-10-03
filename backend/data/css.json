@@ -11,7 +11,7 @@
       "id": "css_fundamentals_rendering",
       "title": "مبانی، موتور مرورگر و چرخه رندر (Rendering Pipeline)",
       "icon": "⚙️",
-      "level": "mid-level",
+      "level": "mid",
       "questions": [
         {
           "id": "css_fund_q1",
@@ -49,7 +49,7 @@
       "id": "css_selectors_cascade",
       "title": "انتخاب‌گرها، وزن اولویت (Specificity) و لایه‌ها",
       "icon": "🎯",
-      "level": "mid-level",
+      "level": "mid",
       "questions": [
         {
           "id": "css_sel_q1",
@@ -105,7 +105,7 @@
       "id": "css_box_model_layout",
       "title": "مدل جعبه‌ای (Box Model)، رفتار Display و چیدمان",
       "icon": "📦",
-      "level": "mid-level",
+      "level": "mid",
       "questions": [
         {
           "id": "css_box_q1",
@@ -155,7 +155,7 @@
       "id": "css_units_responsive",
       "title": "واحدها، محاسبات، طراحی واکنش‌گرا و Container Queries",
       "icon": "📱",
-      "level": "mid-level",
+      "level": "mid",
       "questions": [
         {
           "id": "css_unit_q1",
@@ -225,7 +225,7 @@
       "id": "css_flexbox_deep",
       "title": "فلکس‌باکس پیشرفته (Flexbox) و تله‌های چیدمان",
       "icon": "📦",
-      "level": "mid-level",
+      "level": "mid",
       "questions": [
         {
           "id": "css_flex_q1",
@@ -263,7 +263,7 @@
       "id": "css_grid_deep",
       "title": "سی‌اس‌اس گرید (CSS Grid)، Subgrid و چیدمان‌های دوبعدی",
       "icon": "🏁",
-      "level": "mid-level",
+      "level": "mid",
       "questions": [
         {
           "id": "css_grid_q1",
@@ -339,7 +339,7 @@
       "id": "css_variables_architecture",
       "title": "متغیرهای CSS، سیستم تم‌دهی (Dark Mode) و معماری",
       "icon": "🎨",
-      "level": "mid-level",
+      "level": "mid",
       "questions": [
         {
           "id": "css_var_q1",
