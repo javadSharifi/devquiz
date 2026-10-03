@@ -93,6 +93,7 @@ async function apiRequest<T>(endpoint: string, options: RequestOptions = {}): Pr
       headers,
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
       signal: controller.signal,
+      keepalive: options.method === 'POST',
     });
 
     let data: unknown;
@@ -125,10 +126,11 @@ export async function registerApi(
   email: string,
   password: string,
   name?: string,
+  extra?: { website?: string },
 ): Promise<{ user: AuthUser; token: string }> {
   return apiRequest<{ user: AuthUser; token: string }>('/api/auth/register', {
     method: 'POST',
-    body: { email, password, name },
+    body: { email, password, name, ...extra },
   });
 }
 
@@ -153,6 +155,7 @@ export async function getMeApi(token: string): Promise<AuthUser> {
 export interface CloudSyncData {
   userStates: Record<string, { state: string; updatedAt: number }>;
   gamification: { streak: number; xp: number; lastActiveDate: string };
+  downloadedTopics?: string[];
 }
 
 export async function pullCloudData(token: string): Promise<CloudSyncData> {
@@ -167,6 +170,7 @@ export async function pushCloudData(
   payload: {
     userStates?: Record<string, { state: string; updatedAt: number }>;
     gamification?: Gamification;
+    downloadedTopics?: string[];
   },
 ): Promise<{ success: boolean; syncedCount: number }> {
   return apiRequest<{ success: boolean; syncedCount: number }>('/api/user/sync', {
@@ -175,3 +179,4 @@ export async function pushCloudData(
     body: payload,
   });
 }
+

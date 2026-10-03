@@ -20,6 +20,34 @@ const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Max-Age': '86400',
 };
 
+// ----------------------------------------------------
+// In-memory IP Rate Limiter
+// ----------------------------------------------------
+interface RateLimitBucket {
+  count: number;
+  resetAt: number;
+}
+const rateLimitMap = new Map<string, RateLimitBucket>();
+
+function checkRateLimit(ip: string, action: string, maxRequests: number, windowMs: number): boolean {
+  if (!ip || ip === 'unknown' || ip === '127.0.0.1') return true;
+  const key = `${action}:${ip}`;
+  const now = Date.now();
+  const bucket = rateLimitMap.get(key);
+
+  if (!bucket || now > bucket.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (bucket.count >= maxRequests) {
+    return false;
+  }
+
+  bucket.count++;
+  return true;
+}
+
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -89,7 +117,23 @@ export default {
       // Auth: Register
       // ----------------------------------------------------
       if (method === 'POST' && url.pathname === '/api/auth/register') {
-        const body = (await request.json()) as { email?: string; password?: string; name?: string };
+        const clientIp = request.headers.get('cf-connecting-ip') || 'unknown';
+        if (!checkRateLimit(clientIp, 'register', 5, 60 * 60 * 1000)) {
+          return errorResponse('تعداد تلاش‌های ثبت‌نام از این آی‌پی بیش از حد مجاز است. لطفاً ۱ ساعت دیگر امتحان کنید.', 429);
+        }
+
+        const body = (await request.json()) as {
+          email?: string;
+          password?: string;
+          name?: string;
+          website?: string;
+        };
+
+        // Honeypot check: automated spammers fill hidden fields
+        if (body.website && body.website.trim().length > 0) {
+          return errorResponse('درخواست نامعتبر است.', 400);
+        }
+
         const email = body.email?.trim().toLowerCase();
         const password = body.password?.trim();
         const name = body.name?.trim() || email?.split('@')[0] || 'کاربر';
@@ -135,7 +179,16 @@ export default {
       // Auth: Login
       // ----------------------------------------------------
       if (method === 'POST' && url.pathname === '/api/auth/login') {
-        const body = (await request.json()) as { email?: string; password?: string };
+        const clientIp = request.headers.get('cf-connecting-ip') || 'unknown';
+        if (!checkRateLimit(clientIp, 'login', 12, 15 * 60 * 1000)) {
+          return errorResponse('تعداد تلاش‌های ورود بیش از حد مجاز است. لطفاً ۱۵ دقیقه دیگر امتحان کنید.', 429);
+        }
+
+        const body = (await request.json()) as {
+          email?: string;
+          password?: string;
+        };
+
         const email = body.email?.trim().toLowerCase();
         const password = body.password?.trim();
 

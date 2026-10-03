@@ -89,11 +89,11 @@ export function installSubscriptions(shell: AppShell): void {
     switch (action.type) {
       case 'SET_USER_STATE':
         void setUserStateEntry(action.key, action.value);
-        triggerDebouncedCloudSync();
+        triggerDebouncedCloudSync(true);
         break;
       case 'SET_GAMIFICATION':
         void saveGamification(action.gamification);
-        triggerDebouncedCloudSync();
+        triggerDebouncedCloudSync(false);
         break;
 
       case 'ADD_CUSTOM_QUESTION':

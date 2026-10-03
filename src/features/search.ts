@@ -408,12 +408,24 @@ function buildSearchResultItem(
     card.classList.toggle('cat-list__item--done', isDone);
     toggle.classList.toggle('cat-list__head--done', isDone);
 
+    // Collapse card after choosing an answer
+    body.setAttribute('hidden', '');
+    toggle.setAttribute('aria-expanded', 'false');
+    card.classList.remove('cat-list__item--open');
+
     store.dispatch({
       type: 'SET_USER_STATE',
       key: qKey,
       value: { state: newState, updatedAt: Date.now() },
     });
-    toast(newState === 'know' ? 'به بلدم منتقل شد ✅' : 'به لیست یادگیری اضافه شد 📚', { kind: 'success', duration: 1500 });
+    toast(
+      newState === 'know'
+        ? 'به بلدم منتقل شد ✅'
+        : newState === 'want_to_learn'
+          ? 'به لیست یادگیری اضافه شد 📚'
+          : 'رد شد ⏭',
+      { kind: 'success', duration: 1500 },
+    );
   }
 
   return card;

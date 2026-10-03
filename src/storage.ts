@@ -72,5 +72,6 @@ export {
 export {
   performFullSync,
   triggerDebouncedCloudSync,
+  flushPendingSync,
 } from './services/data/sync-service.js';
 

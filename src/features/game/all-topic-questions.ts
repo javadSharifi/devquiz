@@ -15,7 +15,7 @@ import { faNum, getPriorityPercent, stateKey } from '../../types.js';
 import type { AppState } from '../../state.js';
 import type { Category, Question, QuestionLevel, QuestionState, Topic } from '../../types.js';
 import { backButton, LEVEL_LABEL, renderPriorityBadge } from '../../lib/helpers.js';
-import { button, emptyState, h, progressBar } from '../../ui.js';
+import { button, emptyState, h, progressBar, toast } from '../../ui.js';
 import { STATE_COLORS } from '../../lib/cat-list-stats.js';
 
 interface TopicQuestionItem {
@@ -246,13 +246,34 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
         h('span', { className: 'all-q__question-text' }, q.question),
       );
 
+      const quickKnowBtn = button(
+        isDone ? '✔ بلدم' : '✅ بلدم',
+        (e: MouseEvent) => {
+          e?.stopPropagation?.();
+          updateState('know');
+        },
+        {
+          variant: 'soft',
+          className: `act act--know all-q__quick-know${isDone ? ' all-q__quick-know--done' : ''}`,
+          ariaLabel: 'ثبت سریع به عنوان بلدم',
+          title: isDone ? 'این سؤال در لیست بلدم قرار دارد' : 'ثبت سریع به عنوان بلدم',
+        },
+      );
+
+      const headWrap = h(
+        'div',
+        { className: 'all-q__head-wrap' },
+        toggle,
+        quickKnowBtn,
+      );
+
       const cardWrap = h(
         'div',
         {
           className: `cat-list__item all-q__item${isDone ? ' cat-list__item--done' : ''}`,
           style: { borderInlineStart: `3px solid ${color}` },
         },
-        toggle,
+        headWrap,
         body,
       );
 
@@ -263,12 +284,28 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
         cardWrap.style.borderInlineStart = `3px solid ${color}`;
         cardWrap.classList.toggle('cat-list__item--done', isDone);
         toggle.classList.toggle('cat-list__head--done', isDone);
+        quickKnowBtn.classList.toggle('all-q__quick-know--done', isDone);
+        quickKnowBtn.textContent = isDone ? '✔ بلدم' : '✅ بلدم';
+        quickKnowBtn.setAttribute('title', isDone ? 'این سؤال در لیست بلدم قرار دارد' : 'ثبت سریع به عنوان بلدم');
+
+        // Collapse card after choosing an answer
+        body.setAttribute('hidden', '');
+        toggle.setAttribute('aria-expanded', 'false');
+        cardWrap.classList.remove('cat-list__item--open');
 
         store.dispatch({
           type: 'SET_USER_STATE',
           key: qKey,
           value: { state: newState, updatedAt: Date.now() },
         });
+        toast(
+          newState === 'know'
+            ? 'به بلدم منتقل شد ✅'
+            : newState === 'want_to_learn'
+              ? 'به لیست یادگیری اضافه شد 📚'
+              : 'رد شد ⏭',
+          { kind: 'success', duration: 1500 },
+        );
       }
 
       listContainer.appendChild(cardWrap);

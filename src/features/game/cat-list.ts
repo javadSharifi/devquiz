@@ -16,7 +16,7 @@ import { faNum, stateKey } from '../../types.js';
 import type { QuestionState, Topic } from '../../types.js';
 import type { AppState } from '../../state.js';
 import { backButton, renderPriorityBadge } from '../../lib/helpers.js';
-import { button, emptyState, h, progressBar } from '../../ui.js';
+import { button, emptyState, h, progressBar, toast } from '../../ui.js';
 import { computeKnownCount, computeProgress, STATE_COLORS } from '../../lib/cat-list-stats.js';
 
 /** Pre-resolved DOM references for a single category-list row + the shared header bits. */
@@ -43,6 +43,7 @@ export function applyCategoryItemState(
   const color = STATE_COLORS[newState];
   refs.itemEl.style.borderInlineStartColor = color;
   refs.itemEl.classList.toggle('cat-list__item--done', newState === 'know');
+  refs.itemEl.classList.remove('cat-list__item--open');
   refs.toggleEl.classList.toggle('cat-list__head--done', newState === 'know');
   refs.bodyEl.setAttribute('hidden', '');
   refs.toggleEl.setAttribute('aria-expanded', 'false');
@@ -146,6 +147,14 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
       const s = store.getState();
       const newPct = computeKnownCount(cat!.questions, s.userStates, s.activeTopicId);
       applyCategoryItemState(refs, newState, total, newPct, formatCount);
+      toast(
+        newState === 'know'
+          ? 'به بلدم منتقل شد ✅'
+          : newState === 'want_to_learn'
+            ? 'به لیست یادگیری اضافه شد 📚'
+            : 'رد شد ⏭',
+        { kind: 'success', duration: 1500 },
+      );
     }
   }
   wrap.appendChild(list);

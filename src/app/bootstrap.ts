@@ -23,6 +23,7 @@ import {
   getTopics,
   getUserStates,
   performFullSync,
+  flushPendingSync,
   runMigrations,
   setActiveTopicId,
 } from '../storage.js';
@@ -128,7 +129,14 @@ export async function bootstrap(shell: AppShell): Promise<void> {
   void fetchCatalog().then((c) => store.dispatch({ type: 'SET_CATALOG', catalog: c.topics })).catch(() => {});
 
   window.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') store.flushPersist();
+    if (document.visibilityState === 'hidden') {
+      store.flushPersist();
+      flushPendingSync();
+    }
+  });
+  window.addEventListener('pagehide', () => {
+    store.flushPersist();
+    flushPendingSync();
   });
 
   installSubscriptions(shell);

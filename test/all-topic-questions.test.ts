@@ -66,4 +66,67 @@ describe('renderAllTopicQuestions', () => {
     expect(items[2].textContent).toContain('سوال اول');
     expect(items[2].textContent).toContain('۵۰٪');
   });
+
+  it('renders quick-know shortcut button on each question item and updates state on click without opening card', () => {
+    fakeStore.getState.mockReturnValue({
+      activeTopicId: 'git',
+      userStates: {},
+    });
+
+    const el = renderAllTopicQuestions(fakeStore.getState(), sampleTopic);
+    const list = el.childNodes.find((c: any) => c.className?.includes('all-questions__list')) as FakeElement;
+    const items = list.childNodes.filter((c: any) => c.className?.includes('all-q__item')) as FakeElement[];
+
+    // Check first item (q2)
+    const firstItem = items[0];
+    const headWrap = firstItem.childNodes.find((c: any) => c.className?.includes('all-q__head-wrap')) as FakeElement;
+    expect(headWrap).toBeDefined();
+
+    const quickKnowBtn = headWrap.childNodes.find((c: any) => c.className?.includes('all-q__quick-know')) as FakeElement;
+    expect(quickKnowBtn).toBeDefined();
+    expect(quickKnowBtn.textContent).toBe('✅ بلدم');
+
+    const body = firstItem.childNodes.find((c: any) => c.className?.includes('cat-list__body')) as FakeElement;
+    expect(body.hasAttribute('hidden')).toBe(true);
+
+    // Click quick-know button
+    dom.dispatchClick(quickKnowBtn);
+
+    // Should dispatch SET_USER_STATE with know
+    expect(fakeStore.dispatch).toHaveBeenCalledWith({
+      type: 'SET_USER_STATE',
+      key: 'git:q2',
+      value: expect.objectContaining({ state: 'know' }),
+    });
+
+    // Card should NOT be opened
+    expect(body.hasAttribute('hidden')).toBe(true);
+    expect(firstItem.classList.contains('cat-list__item--open')).toBe(false);
+
+    // Card should be marked as done
+    expect(firstItem.classList.contains('cat-list__item--done')).toBe(true);
+    expect(quickKnowBtn.classList.contains('all-q__quick-know--done')).toBe(true);
+    expect(quickKnowBtn.textContent).toBe('✔ بلدم');
+  });
+
+  it('renders quick-know button with done state if question is already known', () => {
+    fakeStore.getState.mockReturnValue({
+      activeTopicId: 'git',
+      userStates: {
+        'git:q2': { state: 'know', updatedAt: 123 },
+      },
+    });
+
+    const el = renderAllTopicQuestions(fakeStore.getState(), sampleTopic);
+    const list = el.childNodes.find((c: any) => c.className?.includes('all-questions__list')) as FakeElement;
+    const items = list.childNodes.filter((c: any) => c.className?.includes('all-q__item')) as FakeElement[];
+
+    const firstItem = items[0]; // q2
+    expect(firstItem.className).toContain('cat-list__item--done');
+
+    const headWrap = firstItem.childNodes.find((c: any) => c.className?.includes('all-q__head-wrap')) as FakeElement;
+    const quickKnowBtn = headWrap.childNodes.find((c: any) => c.className?.includes('all-q__quick-know')) as FakeElement;
+    expect(quickKnowBtn.className).toContain('all-q__quick-know--done');
+    expect(quickKnowBtn.textContent).toBe('✔ بلدم');
+  });
 });

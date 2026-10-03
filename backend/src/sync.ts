@@ -11,11 +11,13 @@ export interface SyncPayload {
     xp: number;
     lastActiveDate: string;
   };
+  downloadedTopics?: string[];
 }
 
 export async function getUserCloudData(db: D1Database, userId: string): Promise<{
   userStates: Record<string, { state: string; updatedAt: number }>;
   gamification: { streak: number; xp: number; lastActiveDate: string };
+  downloadedTopics: string[];
 }> {
   // 1. Fetch user states
   const statesResult = await db
@@ -24,13 +26,31 @@ export async function getUserCloudData(db: D1Database, userId: string): Promise<
     .all<{ topic_id: string; question_id: string; state: string; updated_at: number }>();
 
   const userStates: Record<string, { state: string; updatedAt: number }> = {};
+  const topicSet = new Set<string>();
+
   if (statesResult.results) {
     for (const row of statesResult.results) {
       userStates[`${row.topic_id}:${row.question_id}`] = {
         state: row.state,
         updatedAt: row.updated_at,
       };
+      topicSet.add(row.topic_id);
     }
+  }
+
+  // Also query user_topics if available
+  try {
+    const topicsResult = await db
+      .prepare('SELECT topic_id FROM user_topics WHERE user_id = ?')
+      .bind(userId)
+      .all<{ topic_id: string }>();
+    if (topicsResult.results) {
+      for (const row of topicsResult.results) {
+        topicSet.add(row.topic_id);
+      }
+    }
+  } catch {
+    // If user_topics table doesn't exist yet, topicSet still has all played topics
   }
 
   // 2. Fetch gamification
@@ -47,7 +67,7 @@ export async function getUserCloudData(db: D1Database, userId: string): Promise<
       }
     : { streak: 0, xp: 0, lastActiveDate: '' };
 
-  return { userStates, gamification };
+  return { userStates, gamification, downloadedTopics: Array.from(topicSet) };
 }
 
 export async function saveUserCloudData(
@@ -113,5 +133,25 @@ export async function saveUserCloudData(
       .run();
   }
 
+  // 3. Upsert downloaded topics
+  if (payload.downloadedTopics && payload.downloadedTopics.length > 0) {
+    try {
+      const now = Date.now();
+      const topicStatements = payload.downloadedTopics.map((topicId) =>
+        db
+          .prepare(
+            `INSERT INTO user_topics (user_id, topic_id, updated_at)
+             VALUES (?, ?, ?)
+             ON CONFLICT(user_id, topic_id) DO UPDATE SET updated_at = excluded.updated_at`,
+          )
+          .bind(userId, topicId, now),
+      );
+      await db.batch(topicStatements);
+    } catch {
+      // Table might not exist yet; safe fallback
+    }
+  }
+
   return { success: true, syncedCount };
 }
+

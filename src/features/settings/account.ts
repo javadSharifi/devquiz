@@ -17,6 +17,7 @@ import {
   setApiBaseUrl,
 } from '../../storage.js';
 import { faNum } from '../../types.js';
+import { platform } from '../../platform/index.js';
 
 function formatRelativeTime(timestamp: number): string {
   const diffSec = Math.floor((Date.now() - timestamp) / 1000);
@@ -123,7 +124,11 @@ export function renderAccountSection(state: AppState): DocumentFragment {
         const res = await performFullSync();
         syncBtn.disabled = false;
         if (res.success) {
-          toast(`همگام‌سازی با موفقیت انجام شد (${faNum(res.syncedCount)} مورد)`, { kind: 'success' });
+          const autoMsg =
+            res.autoDownloadedCount && res.autoDownloadedCount > 0
+              ? ` (${faNum(res.autoDownloadedCount)} موضوع خودکار دانلود شد)`
+              : '';
+          toast(`همگام‌سازی با موفقیت انجام شد (${faNum(res.syncedCount)} مورد)${autoMsg}`, { kind: 'success' });
         } else {
           toast(res.error || 'خطا در همگام‌سازی.', { kind: 'error' });
         }
@@ -228,9 +233,8 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     const emailInput = h('input', {
       type: 'email',
       id: 'auth-email',
-      required: true,
       className: 'auth-input',
-      attrs: { placeholder: 'name@example.com', dir: 'ltr' },
+      attrs: { placeholder: 'name@example.com', dir: 'ltr', required: '' },
     }) as HTMLInputElement;
     emailInputWrap.appendChild(emailIcon);
     emailInputWrap.appendChild(emailInput);
@@ -245,9 +249,8 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     const passInput = h('input', {
       type: 'password',
       id: 'auth-pass',
-      required: true,
       className: 'auth-input',
-      attrs: { placeholder: '••••••••', dir: 'ltr' },
+      attrs: { placeholder: '••••••••', dir: 'ltr', required: '' },
     }) as HTMLInputElement;
     const togglePassBtn = h(
       'button',
@@ -273,6 +276,28 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     passGroup.appendChild(passLabel);
     passGroup.appendChild(passInputWrap);
 
+    // Honeypot input (invisible to real users, catches spam bots)
+    const honeypotInput = h('input', {
+      type: 'text',
+      id: 'auth-website',
+      className: 'auth-hp',
+      attrs: {
+        name: 'website',
+        tabindex: '-1',
+        autocomplete: 'off',
+        'aria-hidden': 'true',
+      },
+      style: {
+        position: 'absolute',
+        opacity: '0',
+        pointerEvents: 'none',
+        height: '0',
+        width: '0',
+        margin: '0',
+        padding: '0',
+      },
+    }) as HTMLInputElement;
+
     const hintText = h(
       'div',
       { className: 'auth-hint-text' },
@@ -288,6 +313,7 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     );
     submitBtn.type = 'submit';
 
+    form.appendChild(honeypotInput);
     form.appendChild(nameGroup);
     form.appendChild(emailGroup);
     form.appendChild(passGroup);
@@ -330,14 +356,17 @@ export function renderAccountSection(state: AppState): DocumentFragment {
       errorBox.style.display = 'none';
       submitBtn.disabled = true;
       const prevText = submitBtn.textContent;
-      submitBtn.textContent = 'در حال ارتباط با Cloudflare...';
+      submitBtn.textContent = 'در حال ارتباط با سرور...';
 
       try {
         let authSession: { user: { id: string; email: string; name: string }; token: string };
+        const website = honeypotInput.value;
         if (mode === 'login') {
           authSession = await loginApi(email, password);
         } else {
-          authSession = await registerApi(email, password, name || undefined);
+          authSession = await registerApi(email, password, name || undefined, {
+            website: website || undefined,
+          });
         }
 
         await saveAuthSession(authSession.user, authSession.token);
@@ -351,8 +380,15 @@ export function renderAccountSection(state: AppState): DocumentFragment {
 
         // Trigger initial cloud sync
         void performFullSync().then((res) => {
-          if (res.success && res.syncedCount > 0) {
-            toast(`پیشرفت شما با سرور ابری همگام شد (${faNum(res.syncedCount)} کارت)`, { kind: 'success' });
+          if (res.success) {
+            if (res.autoDownloadedCount && res.autoDownloadedCount > 0) {
+              toast(
+                `پیشرفت شما همگام شد و ${faNum(res.autoDownloadedCount)} موضوع به‌طور خودکار دانلود شدند 🚀`,
+                { kind: 'success' },
+              );
+            } else if (res.syncedCount > 0) {
+              toast(`پیشرفت شما با سرور ابری همگام شد (${faNum(res.syncedCount)} کارت)`, { kind: 'success' });
+            }
           }
         });
       } catch (err) {

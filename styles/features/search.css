@@ -153,6 +153,27 @@
   color: var(--accent-strong);
   font-size: var(--fs-11);
   font-weight: 700;
+  line-height: 1.4;
+}
+
+.search-item__topic-chip .topic-tile__icon {
+  font-size: var(--fs-12);
+  line-height: 1;
+  filter: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-item__topic-chip .topic-tile__icon--img {
+  width: 14px;
+  height: 14px;
+  max-width: 14px;
+  max-height: 14px;
+  object-fit: contain;
+  filter: none;
+  flex-shrink: 0;
+  vertical-align: middle;
 }
 
 .search-item__cat-chip {

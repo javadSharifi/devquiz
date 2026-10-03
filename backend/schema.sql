@@ -31,5 +31,15 @@ CREATE TABLE IF NOT EXISTS user_gamification (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS user_topics (
+  user_id TEXT NOT NULL,
+  topic_id TEXT NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (user_id, topic_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS idx_user_states_user ON user_states(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_states_topic ON user_states(user_id, topic_id);
+CREATE INDEX IF NOT EXISTS idx_user_topics_user ON user_topics(user_id);
+
