@@ -60,7 +60,7 @@
       "id": "html",
       "title": "HTML5",
       "description": "سوالات سطح Junior تا Senior: تگ‌های معنایی، فرم‌ها، سئو، دسترسی‌پذیری و وب‌کامپوننت‌ها.",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "icon": "https://cdn.simpleicons.org/html5/E34F26",
       "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/html.json"
     },
@@ -68,7 +68,7 @@
       "id": "css",
       "title": "CSS3",
       "description": "سوالات سطح Junior تا Senior: انتخاب‌گرها، باکس مدل، فلکس‌باکس، گرید، انیمیشن‌ها، متغیرها و معماری مدرن.",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "icon": "https://cdn.simpleicons.org/css/1572B6",
       "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/css.json"
     },
@@ -76,7 +76,7 @@
       "id": "seo",
       "title": "سئو (SEO)",
       "description": "سوالات سطح Junior تا Senior: مفاهیم پایه، HTML معنایی، معماری سئو، رندرینگ (SSR/CSR)، عملکرد و Core Web Vitals، و تکنیک‌های دیباگ.",
-      "version": "1.1.0",
+      "version": "2.0.0",
       "icon": "https://cdn.simpleicons.org/google/4285F4",
       "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/seo.json"
     },
@@ -84,7 +84,7 @@
       "id": "rest_api",
       "title": "REST API",
       "description": "سوالات سطح Junior تا Senior: معماری و اصول REST، متدهای HTTP، کدهای وضعیت، احراز هویت و Best Practiceها.",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "icon": "https://cdn.simpleicons.org/postman/FF6C37",
       "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/rest_api.json"
     },
@@ -92,7 +92,7 @@
       "id": "devtools_web",
       "title": "DevTools Web",
       "description": "سوالات ابزارهای توسعه وب: ابزارهای Elements، Console، Network، Performance و دیباگینگ پیشرفته مرورگر.",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "icon": "https://cdn.simpleicons.org/googlechrome/4285F4",
       "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/devtools_web.json"
     },
@@ -100,7 +100,7 @@
       "id": "design_systems",
       "title": "سیستم‌های طراحی (Design Systems)",
       "description": "مفاهیم سیستم‌های طراحی، دیزاین توکن‌ها، کامپوننت‌ها، الگوها، مستندسازی و ابزارها.",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "icon": "https://cdn.simpleicons.org/figma/F24E1E",
       "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/design_systems.json"
     },
@@ -113,4 +113,4 @@
       "downloadUrl": "https://gist.githubusercontent.com/javadSharifi/b54997f0fdbdf2b1d34f69be116cedfb/raw/ux_tools.json"
     }
   ]
-}
+}
