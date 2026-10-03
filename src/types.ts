@@ -186,8 +186,11 @@ export function isQuestion(x: unknown): x is Question {
 }
 
 export function isCategory(x: unknown): x is Category {
+  if (!isRecord(x)) return false;
+  if (x['level'] === 'mid-level') x['level'] = 'mid';
+  else if (x['level'] === 'junior-level') x['level'] = 'junior';
+  else if (x['level'] === 'senior-level') x['level'] = 'senior';
   return (
-    isRecord(x) &&
     isNonEmptyString(x['id']) &&
     typeof x['title'] === 'string' &&
     isQuestionLevel(x['level']) &&

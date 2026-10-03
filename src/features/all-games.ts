@@ -174,6 +174,7 @@ async function downloadOne(item: TopicCatalogItem): Promise<void> {
     store.dispatch({ type: 'DATA_CHANGED' });
   } catch (e) {
     inflight.delete(item.id);
-    toast(`دانلود «${item.title}» ناموفق بود.`, { kind: 'error', duration: 3000 });
+    const msg = e instanceof Error ? e.message : 'خطای نامشخص';
+    toast(`دانلود «${item.title}» ناموفق بود: ${msg}`, { kind: 'error', duration: 4000 });
   }
 }

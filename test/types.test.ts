@@ -233,6 +233,12 @@ describe('isCategory', () => {
   it('rejects empty empty questions array', () => {
     expect(isCategory({ ...validCat, questions: [] })).toBe(true);
   });
+
+  it('normalizes mid-level to mid', () => {
+    const cat = { ...validCat, level: 'mid-level' };
+    expect(isCategory(cat)).toBe(true);
+    expect(cat.level).toBe('mid');
+  });
 });
 
 describe('isTopic', () => {
