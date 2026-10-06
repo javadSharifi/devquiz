@@ -34,6 +34,7 @@ import { initHeader, renderHeader } from './header.js';
 import { renderMain, renderNav, type AppShell } from './router.js';
 import { bindKeyboard } from './keyboard.js';
 import { installSubscriptions } from './subscriptions.js';
+import { initBackNavigation } from './back-navigation.js';
 
 export async function bootstrap(shell: AppShell): Promise<void> {
   try {
@@ -126,6 +127,7 @@ export async function bootstrap(shell: AppShell): Promise<void> {
   renderNav(shell);
   renderMain(store.getState(), shell);
   bindKeyboard(shell);
+  initBackNavigation();
   void fetchCatalog().then((c) => store.dispatch({ type: 'SET_CATALOG', catalog: c.topics })).catch(() => {});
 
   window.addEventListener('visibilitychange', () => {

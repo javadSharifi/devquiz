@@ -2,8 +2,8 @@ import { buildFlashcard } from '../components/flashcard.js';
 import { store } from '../state.js';
 import { findQuestion, getMergedTopic } from '../lib/topic-utils.js';
 import { answerRandomCard as undoAnswerRandomCard, XP_PER_STATE, setLastFlashcard } from '../lib/undo.js';
-import { backButton, renderPriorityBadge } from '../lib/helpers.js';
-import type { Category, Question } from '../types.js';
+import { backButton, renderPriorityBadge, topicIconEl } from '../lib/helpers.js';
+import type { Category, Question, QuestionLevel, QuestionState } from '../types.js';
 import type { AppState } from '../state.js';
 import { stateKey } from '../types.js';
 import { faNum } from '../types.js';
@@ -12,8 +12,26 @@ import { button, emptyState, h, toast } from '../ui.js';
 
 const randomSeen = new Set<string>();
 
-function clearRandomSeen(): void {
+export function clearRandomSeen(): void {
   randomSeen.clear();
+}
+
+let selectedReviewTopic: string = 'all';
+let selectedReviewLevel: QuestionLevel | 'all' = 'all';
+let selectedReviewState: QuestionState | 'all' = 'all';
+
+export function getReviewTopicFilter(): string {
+  return selectedReviewTopic;
+}
+
+export function setReviewTopicFilter(tid: string): void {
+  selectedReviewTopic = tid;
+}
+
+export function resetReviewFilters(): void {
+  selectedReviewTopic = 'all';
+  selectedReviewLevel = 'all';
+  selectedReviewState = 'all';
 }
 
 function isEligibleForRandom(state: AppState, topicId: string, questionId: string): boolean {
@@ -21,10 +39,21 @@ function isEligibleForRandom(state: AppState, topicId: string, questionId: strin
   return s !== 'know';
 }
 
+interface ReviewItemData {
+  q: Question;
+  cat: Category;
+  topicId: string;
+  topicTitle: string;
+  topicIcon?: string;
+}
+
 export function renderReview(state: AppState): HTMLElement {
   const wrap = h('div', { className: 'view view--review' });
-  const topic = getMergedTopic(state.activeTopicId);
-  if (!topic) return emptyState('📭', 'موضوعی یافت نشد', '');
+  const topicIds = Object.keys(state.topics);
+
+  if (topicIds.length === 0) {
+    return emptyState('📭', 'موضوعی یافت نشد', 'ابتدا از صفحه همه بازی‌ها یک بازی دانلود یا انتخاب کنید.');
+  }
 
   if (state.randomQuestionId !== null) {
     const q = findQuestion(state.activeTopicId, state.randomQuestionId);
@@ -43,7 +72,7 @@ export function renderReview(state: AppState): HTMLElement {
       const card = buildFlashcard(q, state.isFlipped, (newState, btn) => {
         const xp = XP_PER_STATE[newState];
         setLastFlashcard(card);
-        undoAnswerRandomCard(q, newState, xp, pickRandomQuestion, btn);
+        undoAnswerRandomCard(q, newState, xp, () => pickRandomQuestion(selectedReviewTopic), btn);
       });
       card.classList.add('card-enter');
       setLastFlashcard(card);
@@ -52,6 +81,7 @@ export function renderReview(state: AppState): HTMLElement {
     }
   }
 
+  // Header
   wrap.appendChild(
     h(
       'div',
@@ -60,41 +90,202 @@ export function renderReview(state: AppState): HTMLElement {
       h('h2', { className: 'view__title' }, 'مرور'),
     ),
   );
-  wrap.appendChild(
-    button('🎲 سؤال تصادفی', () => pickRandomQuestion(), { variant: 'primary', className: 'btn--wide' }),
-  );
 
-  const items: { q: Question; cat: Category; topicId: string }[] = [];
+  // Gather all learning items across all topics
+  const allLearningItems: ReviewItemData[] = [];
+  const topicCounts: Record<string, number> = {};
+  for (const tid of topicIds) {
+    topicCounts[tid] = 0;
+  }
 
-  for (const topicId of Object.keys(state.topics)) {
+  for (const topicId of topicIds) {
     const topic = getMergedTopic(topicId);
     if (!topic) continue;
+    const catalogItem = state.catalog.find((c) => c.id === topicId);
+    const topicTitle = topic.meta.title || catalogItem?.title || topicId;
+    const topicIcon = catalogItem?.icon ?? topic.meta.icon;
+
     for (const cat of topic.categories) {
       for (const q of cat.questions) {
         const s = state.userStates[stateKey(topicId, q.id)]?.state ?? 'unseen';
         if (s === 'want_to_learn' || s === 'skip') {
-          items.push({ q, cat, topicId });
+          allLearningItems.push({ q, cat, topicId, topicTitle, topicIcon });
+          topicCounts[topicId] = (topicCounts[topicId] ?? 0) + 1;
         }
       }
     }
   }
 
-  wrap.appendChild(h('h3', { className: 'section-title' }, `📚 لیست یادگیری (${faNum(items.length)})`));
-  if (items.length === 0) {
+  // Random question button (topic-aware)
+  const isFilteredTopic = selectedReviewTopic !== 'all' && state.topics[selectedReviewTopic] !== undefined;
+  const filteredTopicTitle = isFilteredTopic
+    ? (state.topics[selectedReviewTopic]?.meta?.title || selectedReviewTopic)
+    : '';
+
+  const randomBtnLabel = isFilteredTopic
+    ? `🎲 سؤال تصادفی (${filteredTopicTitle})`
+    : '🎲 سؤال تصادفی';
+
+  wrap.appendChild(
+    button(
+      randomBtnLabel,
+      () => pickRandomQuestion(selectedReviewTopic),
+      { variant: 'primary', className: 'btn--wide' },
+    ),
+  );
+
+  // Filters container
+  const filtersWrap = h('div', { className: 'review-filters' });
+
+  // Topic filter chips
+  const chipsScroll = h('div', {
+    className: 'review-chips-scroll',
+    attrs: { role: 'tablist', 'aria-label': 'فیلتر موضوعات مرور' },
+  });
+
+  // "All" chip
+  const allActive = selectedReviewTopic === 'all';
+  const allChip = h(
+    'button',
+    {
+      className: `review-chip${allActive ? ' review-chip--active' : ''}`,
+      type: 'button',
+      attrs: { 'aria-pressed': String(allActive), 'aria-label': `همه موضوعات: ${faNum(allLearningItems.length)} سؤال` },
+      onClick: () => {
+        if (selectedReviewTopic === 'all') return;
+        selectedReviewTopic = 'all';
+        store.dispatch({ type: 'DATA_CHANGED' });
+      },
+    },
+    h('span', {}, 'همه'),
+    h('span', { className: 'review-chip__count' }, faNum(allLearningItems.length)),
+  );
+  chipsScroll.appendChild(allChip);
+
+  // Individual topic chips
+  for (const tid of topicIds) {
+    const topic = state.topics[tid];
+    if (!topic) continue;
+    const catalogItem = state.catalog.find((c) => c.id === tid);
+    const title = topic.meta?.title || catalogItem?.title || tid;
+    const icon = catalogItem?.icon ?? topic.meta?.icon;
+    const count = topicCounts[tid] ?? 0;
+    const active = selectedReviewTopic === tid;
+
+    const chip = h(
+      'button',
+      {
+        className: `review-chip${active ? ' review-chip--active' : ''}`,
+        type: 'button',
+        attrs: { 'aria-pressed': String(active), 'aria-label': `${title}: ${faNum(count)} سؤال` },
+        onClick: () => {
+          selectedReviewTopic = active ? 'all' : tid;
+          store.dispatch({ type: 'DATA_CHANGED' });
+        },
+      },
+      topicIconEl({ id: tid, icon }),
+      h('span', { className: 'review-chip__title' }, title),
+      h('span', { className: 'review-chip__count' }, faNum(count)),
+    );
+    chipsScroll.appendChild(chip);
+  }
+  filtersWrap.appendChild(chipsScroll);
+
+  // Secondary filters (Level & State)
+  const secondaryFilters = h('div', { className: 'review-secondary-filters' });
+
+  const levelSelect = h(
+    'select',
+    {
+      className: 'review-select',
+      attrs: { 'aria-label': 'فیلتر سطح سؤالات مرور' },
+      onChange: (ev) => {
+        selectedReviewLevel = (ev.target as HTMLSelectElement).value as QuestionLevel | 'all';
+        store.dispatch({ type: 'DATA_CHANGED' });
+      },
+    },
+    h('option', { attrs: { value: 'all', ...(selectedReviewLevel === 'all' ? { selected: '' } : {}) } }, 'همه سطوح'),
+    h('option', { attrs: { value: 'junior', ...(selectedReviewLevel === 'junior' ? { selected: '' } : {}) } }, 'جونیور 🌱'),
+    h('option', { attrs: { value: 'mid', ...(selectedReviewLevel === 'mid' ? { selected: '' } : {}) } }, 'میدلول ⚙️'),
+    h('option', { attrs: { value: 'senior', ...(selectedReviewLevel === 'senior' ? { selected: '' } : {}) } }, 'سنیور 🧭'),
+  );
+
+  const stateSelect = h(
+    'select',
+    {
+      className: 'review-select',
+      attrs: { 'aria-label': 'فیلتر وضعیت سؤالات مرور' },
+      onChange: (ev) => {
+        selectedReviewState = (ev.target as HTMLSelectElement).value as QuestionState | 'all';
+        store.dispatch({ type: 'DATA_CHANGED' });
+      },
+    },
+    h('option', { attrs: { value: 'all', ...(selectedReviewState === 'all' ? { selected: '' } : {}) } }, 'همه وضعیت‌ها'),
+    h('option', { attrs: { value: 'want_to_learn', ...(selectedReviewState === 'want_to_learn' ? { selected: '' } : {}) } }, 'یاد می‌گیرم 📌'),
+    h('option', { attrs: { value: 'skip', ...(selectedReviewState === 'skip' ? { selected: '' } : {}) } }, 'رد شده ⏭'),
+  );
+
+  secondaryFilters.appendChild(levelSelect);
+  secondaryFilters.appendChild(stateSelect);
+  filtersWrap.appendChild(secondaryFilters);
+  wrap.appendChild(filtersWrap);
+
+  // Filter items according to active filters
+  const filteredItems = allLearningItems.filter((item) => {
+    if (selectedReviewTopic !== 'all' && item.topicId !== selectedReviewTopic) return false;
+    if (selectedReviewLevel !== 'all' && item.cat.level !== selectedReviewLevel) return false;
+    if (selectedReviewState !== 'all') {
+      const s = state.userStates[stateKey(item.topicId, item.q.id)]?.state;
+      if (s !== selectedReviewState) return false;
+    }
+    return true;
+  });
+
+  const sectionTitle = isFilteredTopic
+    ? `📚 لیست یادگیری: ${filteredTopicTitle} (${faNum(filteredItems.length)})`
+    : `📚 لیست یادگیری (${faNum(filteredItems.length)})`;
+
+  wrap.appendChild(h('h3', { className: 'section-title' }, sectionTitle));
+
+  if (allLearningItems.length === 0) {
     wrap.appendChild(
       emptyState('🌱', 'لیست یادگیری خالیه', 'وقتی روی کارتی «یاد می‌گیرم» بزنی، اینجا برای مرور ظاهر می‌شه.'),
     );
     return wrap;
   }
+
+  if (filteredItems.length === 0) {
+    const clearBtn = button(
+      'نمایش همه سؤالات',
+      () => {
+        resetReviewFilters();
+        store.dispatch({ type: 'DATA_CHANGED' });
+      },
+      { variant: 'soft', className: 'btn--sm' },
+    );
+    wrap.appendChild(
+      emptyState('🔍', 'سؤالی با این فیلتر یافت نشد', 'می‌توانی فیلترها را تغییر دهی یا پاک کنی.', clearBtn),
+    );
+    return wrap;
+  }
+
   const list = h('div', { className: 'review-list' });
-  for (const { q, cat, topicId } of items) {
-    list.appendChild(reviewItem(state, q, cat, topicId));
+  const showTopicBadge = selectedReviewTopic === 'all';
+  for (const { q, cat, topicId, topicTitle } of filteredItems) {
+    list.appendChild(reviewItem(state, q, cat, topicId, topicTitle, showTopicBadge));
   }
   wrap.appendChild(list);
   return wrap;
 }
 
-function reviewItem(state: AppState, q: Question, cat: Category, topicId: string): HTMLElement {
+function reviewItem(
+  state: AppState,
+  q: Question,
+  cat: Category,
+  topicId: string,
+  topicTitle: string,
+  showTopicBadge: boolean,
+): HTMLElement {
   const body = h('div', { className: 'review-item__body', attrs: { hidden: '' } });
   let rendered = false;
   const toggle = h(
@@ -129,6 +320,7 @@ function reviewItem(state: AppState, q: Question, cat: Category, topicId: string
     },
     h('span', { className: 'review-item__cat', attrs: { 'aria-hidden': 'true' } }, cat.icon),
     h('span', { className: 'review-item__q' }, q.question),
+    ...(showTopicBadge ? [h('span', { className: 'review-item__topic-badge' }, topicTitle)] : []),
     renderPriorityBadge(q.priority, { compact: true }),
     h('span', { className: 'review-item__chev', attrs: { 'aria-hidden': 'true' } }, '‹'),
   );
@@ -136,11 +328,15 @@ function reviewItem(state: AppState, q: Question, cat: Category, topicId: string
   return item;
 }
 
-export function pickRandomQuestion(): void {
+export function pickRandomQuestion(topicFilter?: string): void {
   const state = store.getState();
   const pool: { topicId: string; qId: string }[] = [];
 
-  for (const topicId of Object.keys(state.topics)) {
+  const targetTopicIds = (topicFilter && topicFilter !== 'all' && state.topics[topicFilter] !== undefined)
+    ? [topicFilter]
+    : Object.keys(state.topics);
+
+  for (const topicId of targetTopicIds) {
     const topic = getMergedTopic(topicId);
     if (!topic) continue;
     for (const cat of topic.categories) {
@@ -154,7 +350,7 @@ export function pickRandomQuestion(): void {
 
   if (pool.length === 0) {
     clearRandomSeen();
-    for (const topicId of Object.keys(state.topics)) {
+    for (const topicId of targetTopicIds) {
       const topic = getMergedTopic(topicId);
       if (!topic) continue;
       for (const cat of topic.categories) {
@@ -167,7 +363,11 @@ export function pickRandomQuestion(): void {
     }
 
     if (pool.length === 0) {
-      toast('همه سؤال‌ها رو بلدی 🎉', { kind: 'success' });
+      const targetTitle = (topicFilter && topicFilter !== 'all')
+        ? (state.topics[topicFilter]?.meta?.title || topicFilter)
+        : null;
+      const msg = targetTitle ? `همه سؤال‌های ${targetTitle} رو بلدی 🎉` : 'همه سؤال‌ها رو بلدی 🎉';
+      toast(msg, { kind: 'success' });
       store.dispatch({ type: 'SET_RANDOM_QUESTION', questionId: null });
       return;
     }
@@ -181,3 +381,4 @@ export function pickRandomQuestion(): void {
   store.dispatch({ type: 'SET_ACTIVE_TOPIC', topicId: pick.topicId });
   store.dispatch({ type: 'SET_RANDOM_QUESTION', questionId: pick.qId });
 }
+

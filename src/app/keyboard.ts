@@ -9,6 +9,7 @@ import { store } from '../state.js';
 import { answerCurrentCard, answerRandomCard, XP_PER_STATE } from '../lib/undo.js';
 import { findQuestion } from '../lib/topic-utils.js';
 import { pickRandomQuestion } from '../features/review.js';
+import { canNavigateBack, handleBackAction } from './back-navigation.js';
 import type { AppShell } from './router.js';
 
 export function bindKeyboard(shell: AppShell): void {
@@ -29,6 +30,15 @@ export function bindKeyboard(shell: AppShell): void {
         searchInput?.focus();
       }, 50);
       return;
+    }
+
+    if (ev.key === 'Escape') {
+      const s = store.getState();
+      if (canNavigateBack(s)) {
+        ev.preventDefault();
+        handleBackAction(s);
+        return;
+      }
     }
 
     const card = shell.mainEl.querySelector<HTMLElement>('.flashcard');
