@@ -4,6 +4,18 @@
  * Supports offline-first client architecture with conflict resolution.
  * ============================================================ */
 
+export interface CloudCustomQuestion {
+  id: string;
+  topicId: string;
+  categoryId: string;
+  question: string;
+  answer: string;
+  categoryTitle?: string;
+  categoryLevel?: string;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
 export interface SyncPayload {
   userStates?: Record<string, { state: string; updatedAt: number }>;
   gamification?: {
@@ -12,12 +24,14 @@ export interface SyncPayload {
     lastActiveDate: string;
   };
   downloadedTopics?: string[];
+  customQuestions?: CloudCustomQuestion[];
 }
 
 export async function getUserCloudData(db: D1Database, userId: string): Promise<{
   userStates: Record<string, { state: string; updatedAt: number }>;
   gamification: { streak: number; xp: number; lastActiveDate: string };
   downloadedTopics: string[];
+  customQuestions: CloudCustomQuestion[];
 }> {
   // 1. Fetch user states
   const statesResult = await db
@@ -67,7 +81,46 @@ export async function getUserCloudData(db: D1Database, userId: string): Promise<
       }
     : { streak: 0, xp: 0, lastActiveDate: '' };
 
-  return { userStates, gamification, downloadedTopics: Array.from(topicSet) };
+  // 3. Fetch custom questions
+  const customQuestions: CloudCustomQuestion[] = [];
+  try {
+    const qResult = await db
+      .prepare(
+        'SELECT id, topic_id, category_id, question, answer, category_title, category_level, created_at, updated_at FROM user_questions WHERE user_id = ? ORDER BY created_at ASC',
+      )
+      .bind(userId)
+      .all<{
+        id: string;
+        topic_id: string;
+        category_id: string;
+        question: string;
+        answer: string;
+        category_title: string | null;
+        category_level: string | null;
+        created_at: number;
+        updated_at: number;
+      }>();
+
+    if (qResult.results) {
+      for (const r of qResult.results) {
+        customQuestions.push({
+          id: r.id,
+          topicId: r.topic_id,
+          categoryId: r.category_id,
+          question: r.question,
+          answer: r.answer,
+          categoryTitle: r.category_title ?? undefined,
+          categoryLevel: r.category_level ?? undefined,
+          createdAt: r.created_at,
+          updatedAt: r.updated_at,
+        });
+      }
+    }
+  } catch {
+    // If user_questions table doesn't exist yet, safe fallback
+  }
+
+  return { userStates, gamification, downloadedTopics: Array.from(topicSet), customQuestions };
 }
 
 export async function saveUserCloudData(
@@ -152,6 +205,128 @@ export async function saveUserCloudData(
     }
   }
 
+  // 4. Upsert custom questions
+  if (payload.customQuestions && payload.customQuestions.length > 0) {
+    try {
+      const now = Date.now();
+      const chunkSize = 50;
+      for (let i = 0; i < payload.customQuestions.length; i += chunkSize) {
+        const chunk = payload.customQuestions.slice(i, i + chunkSize);
+        const statements = chunk.map((q) =>
+          db
+            .prepare(
+              `INSERT INTO user_questions (id, user_id, topic_id, category_id, question, answer, category_title, category_level, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(user_id, id) DO UPDATE SET
+                 topic_id = excluded.topic_id,
+                 category_id = excluded.category_id,
+                 question = excluded.question,
+                 answer = excluded.answer,
+                 category_title = excluded.category_title,
+                 category_level = excluded.category_level,
+                 updated_at = excluded.updated_at
+               WHERE excluded.updated_at >= user_questions.updated_at`,
+            )
+            .bind(
+              q.id,
+              userId,
+              q.topicId,
+              q.categoryId,
+              q.question,
+              q.answer,
+              q.categoryTitle || null,
+              q.categoryLevel || null,
+              q.createdAt || now,
+              q.updatedAt || now,
+            ),
+        );
+        if (statements.length > 0) {
+          await db.batch(statements);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to sync custom questions:', e);
+    }
+  }
+
   return { success: true, syncedCount };
+}
+
+export async function saveSingleCustomQuestion(
+  db: D1Database,
+  userId: string,
+  q: CloudCustomQuestion,
+): Promise<CloudCustomQuestion> {
+  const now = Date.now();
+  const createdAt = q.createdAt || now;
+  const updatedAt = q.updatedAt || now;
+
+  await db
+    .prepare(
+      `INSERT INTO user_questions (id, user_id, topic_id, category_id, question, answer, category_title, category_level, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(user_id, id) DO UPDATE SET
+         topic_id = excluded.topic_id,
+         category_id = excluded.category_id,
+         question = excluded.question,
+         answer = excluded.answer,
+         category_title = excluded.category_title,
+         category_level = excluded.category_level,
+         updated_at = excluded.updated_at`,
+    )
+    .bind(
+      q.id,
+      userId,
+      q.topicId,
+      q.categoryId,
+      q.question,
+      q.answer,
+      q.categoryTitle || null,
+      q.categoryLevel || null,
+      createdAt,
+      updatedAt,
+    )
+    .run();
+
+  return {
+    ...q,
+    createdAt,
+    updatedAt,
+  };
+}
+
+export async function getUserCustomQuestions(
+  db: D1Database,
+  userId: string,
+): Promise<CloudCustomQuestion[]> {
+  const result = await db
+    .prepare(
+      'SELECT id, topic_id, category_id, question, answer, category_title, category_level, created_at, updated_at FROM user_questions WHERE user_id = ? ORDER BY created_at ASC',
+    )
+    .bind(userId)
+    .all<{
+      id: string;
+      topic_id: string;
+      category_id: string;
+      question: string;
+      answer: string;
+      category_title: string | null;
+      category_level: string | null;
+      created_at: number;
+      updated_at: number;
+    }>();
+
+  if (!result.results) return [];
+  return result.results.map((r) => ({
+    id: r.id,
+    topicId: r.topic_id,
+    categoryId: r.category_id,
+    question: r.question,
+    answer: r.answer,
+    categoryTitle: r.category_title ?? undefined,
+    categoryLevel: r.category_level ?? undefined,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  }));
 }
 

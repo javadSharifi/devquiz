@@ -68,6 +68,8 @@ export {
   registerApi,
   loginApi,
   getMeApi,
+  addCustomQuestionApi,
+  getCustomQuestionsApi,
 } from './services/api/auth-api.js';
 export {
   performFullSync,

@@ -16,7 +16,12 @@ export function getCustomQuestions(): Promise<CustomQuestion[]> {
 export async function addCustomQuestion(q: CustomQuestion): Promise<void> {
   return locked(async () => {
     const all = await getCustomQuestions();
-    all.push(q);
+    const idx = all.findIndex((item) => item.id === q.id);
+    if (idx >= 0) {
+      all[idx] = q;
+    } else {
+      all.push(q);
+    }
     await setLocal('custom_questions', all);
   });
 }

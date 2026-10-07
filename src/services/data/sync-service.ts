@@ -1,5 +1,5 @@
 import { store } from '../../state.js';
-import type { Gamification, QuestionState, UserQuestionState } from '../../types.js';
+import type { CustomQuestion, Gamification, QuestionState, UserQuestionState } from '../../types.js';
 import { isQuestionState } from '../../types.js';
 import {
   pullCloudData,
@@ -12,6 +12,7 @@ import { setActiveTopicId } from '../storage/flags.js';
 import { saveGamification } from './gamification.js';
 import { downloadTopic, getDownloadedVersions, getTopics } from './topics.js';
 import { getUserStates } from './user-states.js';
+import { getCustomQuestions } from './custom-questions.js';
 
 /**
  * Downloads any topics that exist in the user's cloud data (states or downloaded list)
@@ -121,6 +122,26 @@ export async function performFullSync(): Promise<{
       mergedGamification.streak !== localGamification.streak ||
       mergedGamification.lastActiveDate !== localGamification.lastActiveDate;
 
+    // 3b. Merge custom questions
+    const localCustom = await getCustomQuestions();
+    const localMap = new Map<string, CustomQuestion>(localCustom.map((q) => [q.id, q]));
+    let customQuestionsChanged = false;
+
+    if (cloud.customQuestions && cloud.customQuestions.length > 0) {
+      for (const cq of cloud.customQuestions) {
+        const existing = localMap.get(cq.id);
+        if (!existing) {
+          localMap.set(cq.id, cq);
+          customQuestionsChanged = true;
+        } else if (cq.updatedAt && (!existing.updatedAt || cq.updatedAt > existing.updatedAt)) {
+          localMap.set(cq.id, cq);
+          customQuestionsChanged = true;
+        }
+      }
+    }
+
+    const mergedCustomQuestions = Array.from(localMap.values());
+
     // 4. Update local state and storage if changed
     if (hasLocalChanges) {
       await setLocal('user_states', mergedStates);
@@ -130,6 +151,11 @@ export async function performFullSync(): Promise<{
     if (gamificationChanged) {
       await saveGamification(mergedGamification);
       store.dispatch({ type: 'SET_GAMIFICATION', gamification: mergedGamification });
+    }
+
+    if (customQuestionsChanged) {
+      await setLocal('custom_questions', mergedCustomQuestions);
+      store.dispatch({ type: 'REPLACE_CUSTOM_QUESTIONS', questions: mergedCustomQuestions });
     }
 
     // 4b. Auto-download missing topics from cloud user states or downloaded topics list
@@ -148,7 +174,7 @@ export async function performFullSync(): Promise<{
       store.dispatch({ type: 'REPLACE_USER_STATES', userStates: finalStates });
     }
 
-    if (hasLocalChanges || gamificationChanged || autoDownloadedCount > 0) {
+    if (hasLocalChanges || gamificationChanged || autoDownloadedCount > 0 || customQuestionsChanged) {
       store.dispatch({ type: 'DATA_CHANGED' });
     }
 
@@ -158,6 +184,7 @@ export async function performFullSync(): Promise<{
       userStates: mergedStates,
       gamification: mergedGamification,
       downloadedTopics: Object.keys(allLocalTopics),
+      customQuestions: mergedCustomQuestions,
     });
 
     const now = Date.now();
@@ -197,6 +224,7 @@ async function executeSyncPush(): Promise<void> {
       userStates: s.userStates,
       gamification: s.gamification,
       downloadedTopics: Object.keys(s.topics),
+      customQuestions: s.customQuestions,
     });
     if (pushResult && pushResult.success) {
       const now = Date.now();

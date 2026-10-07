@@ -43,3 +43,20 @@ CREATE INDEX IF NOT EXISTS idx_user_states_user ON user_states(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_states_topic ON user_states(user_id, topic_id);
 CREATE INDEX IF NOT EXISTS idx_user_topics_user ON user_topics(user_id);
 
+CREATE TABLE IF NOT EXISTS user_questions (
+  id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  topic_id TEXT NOT NULL,
+  category_id TEXT NOT NULL,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  category_title TEXT,
+  category_level TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (user_id, id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_questions_user ON user_questions(user_id);
+

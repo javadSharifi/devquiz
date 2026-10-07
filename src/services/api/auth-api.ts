@@ -4,7 +4,7 @@
  * ============================================================ */
 
 import { getLocal, setLocal, removeLocal } from '../storage/chrome-storage.js';
-import type { AuthUser, Gamification, UserQuestionState } from '../../types.js';
+import type { AuthUser, CustomQuestion, Gamification, UserQuestionState } from '../../types.js';
 
 export const AUTH_TOKEN_KEY = 'auth_token';
 export const AUTH_USER_KEY = 'auth_user';
@@ -156,6 +156,7 @@ export interface CloudSyncData {
   userStates: Record<string, { state: string; updatedAt: number }>;
   gamification: { streak: number; xp: number; lastActiveDate: string };
   downloadedTopics?: string[];
+  customQuestions?: CustomQuestion[];
 }
 
 export async function pullCloudData(token: string): Promise<CloudSyncData> {
@@ -171,12 +172,33 @@ export async function pushCloudData(
     userStates?: Record<string, { state: string; updatedAt: number }>;
     gamification?: Gamification;
     downloadedTopics?: string[];
+    customQuestions?: CustomQuestion[];
   },
 ): Promise<{ success: boolean; syncedCount: number }> {
   return apiRequest<{ success: boolean; syncedCount: number }>('/api/user/sync', {
     method: 'POST',
     token,
     body: payload,
+  });
+}
+
+export async function addCustomQuestionApi(
+  token: string,
+  question: CustomQuestion,
+): Promise<{ success: boolean; question: CustomQuestion }> {
+  return apiRequest<{ success: boolean; question: CustomQuestion }>('/api/user/questions', {
+    method: 'POST',
+    token,
+    body: question,
+  });
+}
+
+export async function getCustomQuestionsApi(
+  token: string,
+): Promise<{ questions: CustomQuestion[] }> {
+  return apiRequest<{ questions: CustomQuestion[] }>('/api/user/questions', {
+    method: 'GET',
+    token,
   });
 }
 

@@ -3,7 +3,7 @@ import { getMergedTopic } from '../lib/topic-utils.js';
 import { fieldRow } from '../lib/helpers.js';
 import type { CustomQuestion } from '../types.js';
 import type { AppState } from '../state.js';
-import { addCustomQuestion } from '../storage.js';
+import { addCustomQuestion, addCustomQuestionApi, triggerDebouncedCloudSync } from '../storage.js';
 import { button, h, toast } from '../ui.js';
 
 const NEW_CATEGORY = '__new__';
@@ -91,6 +91,7 @@ export function renderAdd(state: AppState): HTMLElement {
     const categoryId = isNewCat
         ? `custom-cat-${crypto.randomUUID()}`
       : categorySelect.value;
+    const now = Date.now();
     const q: CustomQuestion = {
       id: `custom_${crypto.randomUUID()}`,
       question: questionInput.value.trim(),
@@ -98,18 +99,33 @@ export function renderAdd(state: AppState): HTMLElement {
       topicId,
       categoryId,
       isCustom: true,
+      createdAt: now,
+      updatedAt: now,
       ...(isNewCat ? { categoryTitle: newCatInput.value.trim(), categoryLevel: 'junior' } : {}),
     };
     try {
       await addCustomQuestion(q);
       store.dispatch({ type: 'ADD_CUSTOM_QUESTION', question: q });
+
+      const token = store.getState().authToken;
+      let syncedWithServer = false;
+      if (token) {
+        try {
+          await addCustomQuestionApi(token, q);
+          syncedWithServer = true;
+        } catch (err) {
+          console.warn('Custom question saved locally; cloud sync will retry:', err);
+        }
+      }
+
       questionInput.value = '';
       answerInput.value = '';
       newCatInput.value = '';
       validate();
       fillCategories();
-      toast('سؤال ذخیره شد ✅', { kind: 'success' });
+      toast(syncedWithServer ? 'سؤال ذخیره و در سرور همگام شد ✅' : 'سؤال ذخیره شد ✅', { kind: 'success' });
       store.dispatch({ type: 'DATA_CHANGED' });
+      triggerDebouncedCloudSync(false);
     } catch {
       toast('ذخیره‌سازی ناموفق بود. دوباره تلاش کن.', { kind: 'error' });
     }

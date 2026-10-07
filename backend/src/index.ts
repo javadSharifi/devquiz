@@ -6,7 +6,13 @@
 
 import { generateSalt, hashPassword, signJwt, verifyJwt, verifyPassword } from './auth.js';
 import { getCatalog, getTopicById } from './topics.js';
-import { getUserCloudData, saveUserCloudData, type SyncPayload } from './sync.js';
+import {
+  getUserCloudData,
+  saveUserCloudData,
+  saveSingleCustomQuestion,
+  getUserCustomQuestions,
+  type SyncPayload,
+} from './sync.js';
 
 export interface Env {
   DB: D1Database;
@@ -246,6 +252,7 @@ export default {
       }
 
       // ----------------------------------------------------
+      // ----------------------------------------------------
       // User Sync: POST (Push local states & XP to cloud)
       // ----------------------------------------------------
       if (method === 'POST' && url.pathname === '/api/user/sync') {
@@ -255,6 +262,70 @@ export default {
         const body = (await request.json()) as SyncPayload;
         const result = await saveUserCloudData(env.DB, authUser.userId, body);
         return jsonResponse(result);
+      }
+
+      // ----------------------------------------------------
+      // User Questions: GET (List all questions created by user)
+      // ----------------------------------------------------
+      if (method === 'GET' && url.pathname === '/api/user/questions') {
+        const authUser = await getAuthUser();
+        if (!authUser) return errorResponse('نیاز به ورود به سیستم است.', 401);
+
+        const questions = await getUserCustomQuestions(env.DB, authUser.userId);
+        return jsonResponse({ questions });
+      }
+
+      // ----------------------------------------------------
+      // User Questions: POST (Create / Add question for user)
+      // ----------------------------------------------------
+      if (method === 'POST' && url.pathname === '/api/user/questions') {
+        const authUser = await getAuthUser();
+        if (!authUser) return errorResponse('نیاز به ورود به سیستم است.', 401);
+
+        const body = (await request.json()) as {
+          id?: string;
+          question?: string;
+          answer?: string;
+          topicId?: string;
+          categoryId?: string;
+          categoryTitle?: string;
+          categoryLevel?: string;
+          createdAt?: number;
+          updatedAt?: number;
+        };
+
+        const question = body.question?.trim();
+        const answer = body.answer?.trim();
+        const topicId = body.topicId?.trim();
+        const categoryId = body.categoryId?.trim();
+
+        if (!question || question.length < 5) {
+          return errorResponse('متن سؤال باید حداقل ۵ کاراکتر باشد.');
+        }
+        if (!answer || answer.length < 3) {
+          return errorResponse('پاسخ سؤال باید حداقل ۳ کاراکتر باشد.');
+        }
+        if (!topicId) {
+          return errorResponse('موضوع الزامی است.');
+        }
+        if (!categoryId) {
+          return errorResponse('دسته‌بندی الزامی است.');
+        }
+
+        const id = body.id?.trim() || `custom_${crypto.randomUUID()}`;
+        const saved = await saveSingleCustomQuestion(env.DB, authUser.userId, {
+          id,
+          question,
+          answer,
+          topicId,
+          categoryId,
+          categoryTitle: body.categoryTitle?.trim() || undefined,
+          categoryLevel: body.categoryLevel?.trim() || undefined,
+          createdAt: body.createdAt,
+          updatedAt: body.updatedAt,
+        });
+
+        return jsonResponse({ success: true, question: saved }, 201);
       }
 
       return errorResponse('مسیر یافت نشد.', 404);

@@ -40,6 +40,8 @@ export interface CustomQuestion extends Question {
   categoryTitle?: string;
   /** Level for the brand-new category this question created. */
   categoryLevel?: QuestionLevel;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 export interface UserQuestionState {
