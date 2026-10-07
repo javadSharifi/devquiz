@@ -116,8 +116,20 @@ export function renderReview(state: AppState): HTMLElement {
     }
   }
 
+  if (allLearningItems.length === 0) {
+    wrap.appendChild(
+      emptyState('🌱', 'لیست یادگیری خالیه', 'وقتی روی کارتی «یاد می‌گیرم» بزنی، اینجا برای مرور ظاهر می‌شه.'),
+    );
+    return wrap;
+  }
+
+  // If active filter has 0 items, reset to 'all'
+  if (selectedReviewTopic !== 'all' && (topicCounts[selectedReviewTopic] ?? 0) === 0) {
+    selectedReviewTopic = 'all';
+  }
+
   // Random question button (topic-aware)
-  const isFilteredTopic = selectedReviewTopic !== 'all' && state.topics[selectedReviewTopic] !== undefined;
+  const isFilteredTopic = selectedReviewTopic !== 'all' && (topicCounts[selectedReviewTopic] ?? 0) > 0;
   const filteredTopicTitle = isFilteredTopic
     ? (state.topics[selectedReviewTopic]?.meta?.title || selectedReviewTopic)
     : '';
@@ -134,125 +146,76 @@ export function renderReview(state: AppState): HTMLElement {
     ),
   );
 
-  // Filters container
-  const filtersWrap = h('div', { className: 'review-filters' });
+  // Filter chips: only include topics that actually have learning items (count > 0)
+  const activeTopicIds = topicIds.filter((tid) => (topicCounts[tid] ?? 0) > 0);
 
-  // Topic filter chips
-  const chipsScroll = h('div', {
-    className: 'review-chips-scroll',
-    attrs: { role: 'tablist', 'aria-label': 'فیلتر موضوعات مرور' },
-  });
+  if (activeTopicIds.length > 0) {
+    const filtersWrap = h('div', { className: 'review-filters' });
+    const chipsScroll = h('div', {
+      className: 'review-chips-scroll',
+      attrs: { role: 'tablist', 'aria-label': 'فیلتر موضوعات مرور' },
+    });
 
-  // "All" chip
-  const allActive = selectedReviewTopic === 'all';
-  const allChip = h(
-    'button',
-    {
-      className: `review-chip${allActive ? ' review-chip--active' : ''}`,
-      type: 'button',
-      attrs: { 'aria-pressed': String(allActive), 'aria-label': `همه موضوعات: ${faNum(allLearningItems.length)} سؤال` },
-      onClick: () => {
-        if (selectedReviewTopic === 'all') return;
-        selectedReviewTopic = 'all';
-        store.dispatch({ type: 'DATA_CHANGED' });
-      },
-    },
-    h('span', {}, 'همه'),
-    h('span', { className: 'review-chip__count' }, faNum(allLearningItems.length)),
-  );
-  chipsScroll.appendChild(allChip);
-
-  // Individual topic chips
-  for (const tid of topicIds) {
-    const topic = state.topics[tid];
-    if (!topic) continue;
-    const catalogItem = state.catalog.find((c) => c.id === tid);
-    const title = topic.meta?.title || catalogItem?.title || tid;
-    const icon = catalogItem?.icon ?? topic.meta?.icon;
-    const count = topicCounts[tid] ?? 0;
-    const active = selectedReviewTopic === tid;
-
-    const chip = h(
+    // "All" chip
+    const allActive = selectedReviewTopic === 'all';
+    const allChip = h(
       'button',
       {
-        className: `review-chip${active ? ' review-chip--active' : ''}`,
+        className: `review-chip${allActive ? ' review-chip--active' : ''}`,
         type: 'button',
-        attrs: { 'aria-pressed': String(active), 'aria-label': `${title}: ${faNum(count)} سؤال` },
+        attrs: { 'aria-pressed': String(allActive), 'aria-label': `همه موضوعات: ${faNum(allLearningItems.length)} سؤال` },
         onClick: () => {
-          selectedReviewTopic = active ? 'all' : tid;
+          if (selectedReviewTopic === 'all') return;
+          selectedReviewTopic = 'all';
           store.dispatch({ type: 'DATA_CHANGED' });
         },
       },
-      topicIconEl({ id: tid, icon }),
-      h('span', { className: 'review-chip__title' }, title),
-      h('span', { className: 'review-chip__count' }, faNum(count)),
+      h('span', {}, 'همه'),
+      h('span', { className: 'review-chip__count' }, faNum(allLearningItems.length)),
     );
-    chipsScroll.appendChild(chip);
-  }
-  filtersWrap.appendChild(chipsScroll);
+    chipsScroll.appendChild(allChip);
 
-  // Secondary filters (Level & State)
-  const secondaryFilters = h('div', { className: 'review-secondary-filters' });
+    // Individual topic chips (ONLY for topics with count > 0)
+    for (const tid of activeTopicIds) {
+      const topic = state.topics[tid];
+      if (!topic) continue;
+      const catalogItem = state.catalog.find((c) => c.id === tid);
+      const title = topic.meta?.title || catalogItem?.title || tid;
+      const icon = catalogItem?.icon ?? topic.meta?.icon;
+      const count = topicCounts[tid] ?? 0;
+      const active = selectedReviewTopic === tid;
 
-  const levelSelect = h(
-    'select',
-    {
-      className: 'review-select',
-      attrs: { 'aria-label': 'فیلتر سطح سؤالات مرور' },
-      onChange: (ev) => {
-        selectedReviewLevel = (ev.target as HTMLSelectElement).value as QuestionLevel | 'all';
-        store.dispatch({ type: 'DATA_CHANGED' });
-      },
-    },
-    h('option', { attrs: { value: 'all', ...(selectedReviewLevel === 'all' ? { selected: '' } : {}) } }, 'همه سطوح'),
-    h('option', { attrs: { value: 'junior', ...(selectedReviewLevel === 'junior' ? { selected: '' } : {}) } }, 'جونیور 🌱'),
-    h('option', { attrs: { value: 'mid', ...(selectedReviewLevel === 'mid' ? { selected: '' } : {}) } }, 'میدلول ⚙️'),
-    h('option', { attrs: { value: 'senior', ...(selectedReviewLevel === 'senior' ? { selected: '' } : {}) } }, 'سنیور 🧭'),
-  );
-
-  const stateSelect = h(
-    'select',
-    {
-      className: 'review-select',
-      attrs: { 'aria-label': 'فیلتر وضعیت سؤالات مرور' },
-      onChange: (ev) => {
-        selectedReviewState = (ev.target as HTMLSelectElement).value as QuestionState | 'all';
-        store.dispatch({ type: 'DATA_CHANGED' });
-      },
-    },
-    h('option', { attrs: { value: 'all', ...(selectedReviewState === 'all' ? { selected: '' } : {}) } }, 'همه وضعیت‌ها'),
-    h('option', { attrs: { value: 'want_to_learn', ...(selectedReviewState === 'want_to_learn' ? { selected: '' } : {}) } }, 'یاد می‌گیرم 📌'),
-    h('option', { attrs: { value: 'skip', ...(selectedReviewState === 'skip' ? { selected: '' } : {}) } }, 'رد شده ⏭'),
-  );
-
-  secondaryFilters.appendChild(levelSelect);
-  secondaryFilters.appendChild(stateSelect);
-  filtersWrap.appendChild(secondaryFilters);
-  wrap.appendChild(filtersWrap);
-
-  // Filter items according to active filters
-  const filteredItems = allLearningItems.filter((item) => {
-    if (selectedReviewTopic !== 'all' && item.topicId !== selectedReviewTopic) return false;
-    if (selectedReviewLevel !== 'all' && item.cat.level !== selectedReviewLevel) return false;
-    if (selectedReviewState !== 'all') {
-      const s = state.userStates[stateKey(item.topicId, item.q.id)]?.state;
-      if (s !== selectedReviewState) return false;
+      const chip = h(
+        'button',
+        {
+          className: `review-chip${active ? ' review-chip--active' : ''}`,
+          type: 'button',
+          attrs: { 'aria-pressed': String(active), 'aria-label': `${title}: ${faNum(count)} سؤال` },
+          onClick: () => {
+            selectedReviewTopic = active ? 'all' : tid;
+            store.dispatch({ type: 'DATA_CHANGED' });
+          },
+        },
+        topicIconEl({ id: tid, icon }),
+        h('span', { className: 'review-chip__title' }, title),
+        h('span', { className: 'review-chip__count' }, faNum(count)),
+      );
+      chipsScroll.appendChild(chip);
     }
-    return true;
-  });
+    filtersWrap.appendChild(chipsScroll);
+    wrap.appendChild(filtersWrap);
+  }
+
+  // Filter items according to active filter
+  const filteredItems = selectedReviewTopic === 'all'
+    ? allLearningItems
+    : allLearningItems.filter((item) => item.topicId === selectedReviewTopic);
 
   const sectionTitle = isFilteredTopic
     ? `📚 لیست یادگیری: ${filteredTopicTitle} (${faNum(filteredItems.length)})`
     : `📚 لیست یادگیری (${faNum(filteredItems.length)})`;
 
   wrap.appendChild(h('h3', { className: 'section-title' }, sectionTitle));
-
-  if (allLearningItems.length === 0) {
-    wrap.appendChild(
-      emptyState('🌱', 'لیست یادگیری خالیه', 'وقتی روی کارتی «یاد می‌گیرم» بزنی، اینجا برای مرور ظاهر می‌شه.'),
-    );
-    return wrap;
-  }
 
   if (filteredItems.length === 0) {
     const clearBtn = button(

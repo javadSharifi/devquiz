@@ -142,7 +142,7 @@ function findByClass(node: any, cls: string): any[] {
     expect(btn.textContent).toContain('جاوااسکریپت');
   });
 
-  it('shows empty state when no questions match the selected filter', () => {
+  it('does not render chips for topics that have 0 review questions', () => {
     fakeStore.getState.mockReturnValue({
       activeTopicId: 'javascript',
       activeTab: 'review',
@@ -151,15 +151,37 @@ function findByClass(node: any, cls: string): any[] {
       topics: { javascript: jsTopic, react: reactTopic },
       catalog: [],
       userStates: {
-        'react:r1': { state: 'want_to_learn', updatedAt: 1 },
+        'javascript:js1': { state: 'want_to_learn', updatedAt: 1 },
+        // react has 0 items in want_to_learn or skip
       },
     });
 
-    // Javascript has no items in userStates
-    setReviewTopicFilter('javascript');
     const el = renderReview(fakeStore.getState());
+    expect(el).toBeInstanceOf(FakeElement);
 
-    expect(el.textContent).toContain('سؤالی با این فیلتر یافت نشد');
+    const chips = findByClass(el, 'review-chip');
+    // Only "همه" and "جاوااسکریپت" should be rendered; "ری‌اکت" should NOT be rendered!
+    expect(chips.length).toBe(2);
+    expect(el.textContent).toContain('جاوااسکریپت');
+    expect(chips.some((c) => c.textContent?.includes('ری‌اکت'))).toBe(false);
+  });
+
+  it('renders clean empty state when no topics have any review items', () => {
+    fakeStore.getState.mockReturnValue({
+      activeTopicId: 'javascript',
+      activeTab: 'review',
+      randomQuestionId: null,
+      isFlipped: false,
+      topics: { javascript: jsTopic, react: reactTopic },
+      catalog: [],
+      userStates: {},
+    });
+
+    const el = renderReview(fakeStore.getState());
+    expect(el.textContent).toContain('لیست یادگیری خالیه');
+    // No chips rendered at all
+    const chips = findByClass(el, 'review-chip');
+    expect(chips.length).toBe(0);
   });
 
   it('pickRandomQuestion with topic filter only picks from filtered topic', () => {
