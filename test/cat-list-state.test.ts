@@ -119,4 +119,13 @@ describe('applyCategoryItemState', () => {
     applyCategoryItemState(refs, 'want_to_learn', 3, 2, formatCount);
     expect((refs.barFillEl as unknown as FakeElement).style.width).toBe('67%');
   });
+
+  it('calls scrollIntoView({ block: "nearest" }) on itemEl to keep question in view after collapse', () => {
+    let calledWith: unknown = null;
+    (refs.itemEl as unknown as FakeElement).scrollIntoView = (opts?: any) => {
+      calledWith = opts;
+    };
+    applyCategoryItemState(refs, 'know', 4, 1, formatCount);
+    expect(calledWith).toEqual({ block: 'nearest' });
+  });
 });

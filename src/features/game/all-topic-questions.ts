@@ -204,8 +204,8 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
           type: 'button',
           attrs: { 'aria-expanded': 'false' },
           onClick: () => {
-            const hidden = body.hasAttribute('hidden');
-            if (hidden) {
+            const isOpening = body.hasAttribute('hidden');
+            if (isOpening) {
               body.replaceChildren();
               body.appendChild(buildAnswerBlock(q, cat));
               body.appendChild(
@@ -229,11 +229,13 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
                   }),
                 ),
               );
+              body.removeAttribute('hidden');
+            } else {
+              body.setAttribute('hidden', '');
+              cardWrap.scrollIntoView?.({ block: 'nearest' });
             }
-            if (hidden) body.removeAttribute('hidden');
-            else body.setAttribute('hidden', '');
-            toggle.setAttribute('aria-expanded', String(!hidden));
-            cardWrap.classList.toggle('cat-list__item--open', !hidden);
+            toggle.setAttribute('aria-expanded', String(isOpening));
+            cardWrap.classList.toggle('cat-list__item--open', isOpening);
           },
         },
         h(
@@ -292,6 +294,7 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
         body.setAttribute('hidden', '');
         toggle.setAttribute('aria-expanded', 'false');
         cardWrap.classList.remove('cat-list__item--open');
+        cardWrap.scrollIntoView?.({ block: 'nearest' });
 
         store.dispatch({
           type: 'SET_USER_STATE',

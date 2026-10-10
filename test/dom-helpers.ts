@@ -164,6 +164,7 @@ export class FakeElement extends FakeNode {
     return { left: 0, top: 0, width: 100, height: 40 };
   }
   focus(): void { /* noop */ }
+  scrollIntoView(_options?: boolean | ScrollIntoViewOptions): void { /* noop */ }
   querySelector(): FakeElement | null { return null; }
   querySelectorAll(): FakeElement[] { return []; }
 }

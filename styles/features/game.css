@@ -287,6 +287,7 @@
   border-inline-start-width: 3px;
   overflow: hidden;
   transition: opacity var(--ease);
+  scroll-margin-top: 10px;
 }
 .cat-list__item--done {
   opacity: 0.5;

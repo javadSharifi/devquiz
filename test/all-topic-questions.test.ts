@@ -129,4 +129,45 @@ describe('renderAllTopicQuestions', () => {
     expect(quickKnowBtn.className).toContain('all-q__quick-know--done');
     expect(quickKnowBtn.textContent).toBe('✔ بلدم');
   });
+
+  it('collapses card and calls scrollIntoView when answering via inline action buttons', () => {
+    fakeStore.getState.mockReturnValue({
+      activeTopicId: 'git',
+      userStates: {},
+    });
+
+    const el = renderAllTopicQuestions(fakeStore.getState(), sampleTopic);
+    const list = el.childNodes.find((c: any) => c.className?.includes('all-questions__list')) as FakeElement;
+    const items = list.childNodes.filter((c: any) => c.className?.includes('all-q__item')) as FakeElement[];
+    const firstItem = items[0];
+
+    const headWrap = firstItem.childNodes.find((c: any) => c.className?.includes('all-q__head-wrap')) as FakeElement;
+    const toggle = headWrap.childNodes.find((c: any) => c.className?.includes('cat-list__head')) as FakeElement;
+    const body = firstItem.childNodes.find((c: any) => c.className?.includes('cat-list__body')) as FakeElement;
+
+    // Open card
+    dom.dispatchClick(toggle);
+    expect(body.hasAttribute('hidden')).toBe(false);
+    expect(firstItem.classList.contains('cat-list__item--open')).toBe(true);
+
+    // Spy on scrollIntoView
+    let scrollOptions: unknown = null;
+    firstItem.scrollIntoView = (opts?: any) => {
+      scrollOptions = opts;
+    };
+
+    // Find inline know button
+    const actionsInline = body.childNodes.find((c: any) => c.className?.includes('cat-list__actions-inline')) as FakeElement;
+    expect(actionsInline).toBeDefined();
+    const knowBtn = actionsInline.childNodes.find((c: any) => c.className?.includes('act--know')) as FakeElement;
+    expect(knowBtn).toBeDefined();
+
+    // Click know button
+    dom.dispatchClick(knowBtn);
+
+    // Assert card is collapsed and scrollIntoView called
+    expect(body.hasAttribute('hidden')).toBe(true);
+    expect(firstItem.classList.contains('cat-list__item--open')).toBe(false);
+    expect(scrollOptions).toEqual({ block: 'nearest' });
+  });
 });

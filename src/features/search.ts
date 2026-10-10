@@ -339,8 +339,8 @@ function buildSearchResultItem(
       type: 'button',
       attrs: { 'aria-expanded': 'false', 'aria-label': `نمایش پاسخ: ${q.question.slice(0, 60)}` },
       onClick: () => {
-        const hidden = body.hasAttribute('hidden');
-        if (hidden) {
+        const isOpening = body.hasAttribute('hidden');
+        if (isOpening) {
           body.replaceChildren();
           body.appendChild(buildAnswerView(item));
           body.appendChild(
@@ -372,11 +372,13 @@ function buildSearchResultItem(
               ),
             ),
           );
+          body.removeAttribute('hidden');
+        } else {
+          body.setAttribute('hidden', '');
+          card.scrollIntoView?.({ block: 'nearest' });
         }
-        if (hidden) body.removeAttribute('hidden');
-        else body.setAttribute('hidden', '');
-        toggle.setAttribute('aria-expanded', String(!hidden));
-        card.classList.toggle('cat-list__item--open', !hidden);
+        toggle.setAttribute('aria-expanded', String(isOpening));
+        card.classList.toggle('cat-list__item--open', isOpening);
       },
     },
     h(
@@ -412,6 +414,7 @@ function buildSearchResultItem(
     body.setAttribute('hidden', '');
     toggle.setAttribute('aria-expanded', 'false');
     card.classList.remove('cat-list__item--open');
+    card.scrollIntoView?.({ block: 'nearest' });
 
     store.dispatch({
       type: 'SET_USER_STATE',

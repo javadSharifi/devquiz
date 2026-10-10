@@ -50,6 +50,7 @@ export function applyCategoryItemState(
   refs.countEl.textContent = formatCount(knownCount, total);
   const { widthPct } = computeProgress(knownCount, total, formatCount);
   refs.barFillEl.style.width = `${widthPct}%`;
+  refs.itemEl.scrollIntoView?.({ block: 'nearest' });
 }
 
 export function renderCategoryList(state: AppState, topic: Topic, categoryId: string): HTMLElement {
@@ -113,8 +114,8 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
         type: 'button',
         attrs: { 'aria-expanded': 'false' },
         onClick: () => {
-          const hidden = body.hasAttribute('hidden');
-          if (hidden) {
+          const isOpening = body.hasAttribute('hidden');
+          if (isOpening) {
             body.replaceChildren();
             body.appendChild(renderCardAnswer(q.answer, q.priority));
             body.appendChild(
@@ -124,11 +125,13 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
                 button('⏭ رد کن', () => setQState('skip'), { variant: 'soft', className: 'act act--skip', ariaLabel: 'رد کن' }),
               ),
             );
+            body.removeAttribute('hidden');
+          } else {
+            body.setAttribute('hidden', '');
+            item.scrollIntoView?.({ block: 'nearest' });
           }
-          if (hidden) body.removeAttribute('hidden');
-          else body.setAttribute('hidden', '');
-          toggle.setAttribute('aria-expanded', String(!hidden));
-          toggle.parentElement?.classList.toggle('cat-list__item--open', !hidden);
+          toggle.setAttribute('aria-expanded', String(isOpening));
+          toggle.parentElement?.classList.toggle('cat-list__item--open', isOpening);
         },
       },
       h('span', { className: 'cat-list__q' }, q.question),
