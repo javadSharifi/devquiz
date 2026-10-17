@@ -24,7 +24,8 @@ export function renderHeader(): void {
   xpValueEl = h('span', { className: 'stat__value' }, faNum(gamification.xp));
   headerEl.replaceChildren(
     h('div', { className: 'brand' }, h('span', { className: 'brand__logo', attrs: { 'aria-hidden': 'true' } }, ico('bolt', 18)), 'دِوکوئیز'),
-    searchButton(),
+    themeToggle(),
+    githubLink(),
     ...(platform.isExtension ? [fullscreenToggle()] : []),
     h(
       'div',
@@ -57,26 +58,52 @@ export function updateHeaderStats(): void {
   }
 }
 
-function searchButton(): HTMLElement {
-  return h(
-    'button',
-    {
-      className: 'header-search-btn',
-      type: 'button',
-      title: 'جستجو در همه سؤال‌ها (Ctrl+K / /)',
-      attrs: { 'aria-label': 'جستجو در همه سؤال‌ها' },
-      onClick: () => {
-        store.dispatch({ type: 'SET_TAB', tab: 'search' });
-      },
+const REPO_URL = 'https://github.com/javadSharifi/devquiz';
+
+let themeBtnEl: HTMLButtonElement | null = null;
+
+function themeToggle(): HTMLElement {
+  const btn = h('button', {
+    className: 'header-icon-btn header-icon-btn--first',
+    type: 'button',
+    onClick: () => {
+      const next = store.getState().theme === 'dark' ? 'light' : 'dark';
+      store.dispatch({ type: 'SET_THEME', theme: next });
     },
-    ico('search', 18),
+  });
+  themeBtnEl = btn;
+  updateHeaderTheme();
+  return btn;
+}
+
+/** Keep the header toggle's icon and label in sync with the current theme. */
+export function updateHeaderTheme(): void {
+  if (!themeBtnEl) return;
+  const dark = store.getState().theme === 'dark';
+  const label = dark ? 'تغییر به حالت روشن' : 'تغییر به حالت تیره';
+  themeBtnEl.title = label;
+  themeBtnEl.setAttribute('aria-label', label);
+  themeBtnEl.replaceChildren(ico(dark ? 'sun' : 'moon', 18));
+}
+
+function githubLink(): HTMLElement {
+  const link = h(
+    'a',
+    {
+      className: 'header-icon-btn',
+      href: REPO_URL,
+      title: 'مشاهده در گیت‌هاب',
+      attrs: { target: '_blank', rel: 'noopener noreferrer', 'aria-label': 'مشاهده پروژه در گیت‌هاب' },
+    },
+    ico('github', 18),
   );
+  return link;
 }
 
 function fullscreenToggle(): HTMLElement {
   const isFs = new URLSearchParams(location.search).get('fs') === '1';
   const btn = h('button', {
-    className: 'header-fs-btn',
+    className: 'header-icon-btn',
     type: 'button',
     title: isFs ? 'بستن حالت تمام‌صفحه' : 'باز کردن در صفحه بزرگ',
     attrs: { 'aria-label': isFs ? 'بستن حالت تمام‌صفحه' : 'باز کردن در صفحه بزرگ' },

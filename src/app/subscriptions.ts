@@ -18,12 +18,13 @@ import {
 } from '../storage.js';
 import { applyFlip } from '../components/flashcard.js';
 import { renderMain, renderNav, patchGameCard, type AppShell } from './router.js';
-import { updateHeaderStats } from './header.js';
+import { updateHeaderStats, updateHeaderTheme } from './header.js';
 import { applyFontSize, applyTheme } from './theme.js';
 import { platform } from '../platform/index.js';
 
 export function installSubscriptions(shell: AppShell): void {
   store.subscribe((state, prev) => {
+    if (state.theme !== prev.theme) updateHeaderTheme();
     if (
       (state.fontSize !== prev.fontSize ||
         state.theme !== prev.theme ||

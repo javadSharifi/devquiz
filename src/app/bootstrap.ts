@@ -33,6 +33,7 @@ import { applyFontSize, applyTheme } from './theme.js';
 import { initHeader, renderHeader } from './header.js';
 import { renderMain, renderNav, type AppShell } from './router.js';
 import { bindKeyboard } from './keyboard.js';
+import { bindPlainCopy } from './clipboard.js';
 import { installSubscriptions } from './subscriptions.js';
 import { initBackNavigation } from './back-navigation.js';
 
@@ -127,6 +128,7 @@ export async function bootstrap(shell: AppShell): Promise<void> {
   renderNav(shell);
   renderMain(store.getState(), shell);
   bindKeyboard(shell);
+  bindPlainCopy();
   initBackNavigation();
   void fetchCatalog().then((c) => store.dispatch({ type: 'SET_CATALOG', catalog: c.topics })).catch(() => {});
 
