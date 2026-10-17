@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="DevQuiz">
+  <defs>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8b6dff"/>
+      <stop offset="1" stop-color="#2fd3e6"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#ffe27a"/>
+      <stop offset="1" stop-color="#ffa63d"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#171c33"/>
+      <stop offset="1" stop-color="#0b0e1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect x="10" y="10" width="492" height="492" rx="108" fill="none" stroke="url(#ring)" stroke-width="8" opacity=".55"/>
+  <!-- back card -->
+  <rect x="120" y="108" width="272" height="296" rx="44" fill="#7c5cff" opacity=".28" transform="rotate(-12 256 256)"/>
+  <!-- front card -->
+  <g transform="rotate(7 256 256)">
+    <rect x="112" y="112" width="288" height="288" rx="48" fill="#141a2e" stroke="url(#ring)" stroke-width="16"/>
+    <!-- code brackets -->
+    <path d="M178 214 L138 256 L178 298" fill="none" stroke="#c9d4ff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+    <path d="M334 214 L374 256 L334 298" fill="none" stroke="#c9d4ff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+    <!-- bolt -->
+    <path d="M276 156 L212 272 H252 L236 356 L304 236 H262 Z" fill="url(#bolt)" stroke="#ffd36a" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+</svg>
