@@ -120,6 +120,9 @@ function renderWebIndex() {
     <meta name="color-scheme" content="light dark" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>دِوکوئیز — وب</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/icons/icon16.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="./assets/icons/icon48.png" />
+    <link rel="apple-touch-icon" href="./assets/icons/icon128.png" />
     <link rel="stylesheet" href="./styles/styles.css" />
   </head>
   <body class="popup-body web-body">
