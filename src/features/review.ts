@@ -9,7 +9,7 @@ import { stateKey } from '../types.js';
 import { faNum } from '../types.js';
 import { renderMarkdown } from '../markdown.js';
 import { button, emptyState, h, toast } from '../ui.js';
-import { ico } from '../components/icons.js';
+import { ico, catIcon } from '../components/icons.js';
 
 const randomSeen = new Set<string>();
 
@@ -345,7 +345,7 @@ function reviewItem(
         item.classList.toggle('review-item--open', opening);
       },
     },
-    h('span', { className: 'review-item__cat', attrs: { 'aria-hidden': 'true' } }, ico('folder', 18)),
+    h('span', { className: 'review-item__cat', attrs: { 'aria-hidden': 'true' } }, catIcon(cat.icon, 18)),
     h(
       'span',
       { className: 'review-item__main' },

@@ -21,7 +21,7 @@ import type { Category, Question, QuestionLevel, QuestionState, TopicCatalogItem
 import { LEVEL_LABEL, renderPriorityBadge, topicIconEl } from '../lib/helpers.js';
 import { button, emptyState, h, toast } from '../ui.js';
 import { STATE_COLORS } from '../lib/cat-list-stats.js';
-import { ico } from '../components/icons.js';
+import { ico, catIcon } from '../components/icons.js';
 
 export interface SearchQuestionResult {
   question: Question;
@@ -386,7 +386,7 @@ function buildSearchResultItem(
       'div',
       { className: 'search-item__meta-row' },
       h('span', { className: 'search-item__topic-chip' }, topicIconEl({ id: item.topicId, icon: item.topicIcon }), ` ${item.topicTitle}`),
-      h('span', { className: 'search-item__cat-chip' }, [ico('folder', 12), ` ${item.category.title}`]),
+      h('span', { className: 'search-item__cat-chip' }, [catIcon(item.category.icon, 12), ` ${item.category.title}`]),
       h('span', { className: `all-q__lvl-tag all-q__lvl-tag--${item.category.level}` }, LEVEL_LABEL[item.category.level] ?? item.category.level),
       priorityBadge ?? h('span', { className: 'priority-badge priority-badge--low' }, 'بدون اولویت'),
     ),

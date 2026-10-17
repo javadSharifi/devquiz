@@ -17,7 +17,7 @@ import type { Category, Question, QuestionLevel, QuestionState, Topic } from '..
 import { backButton, LEVEL_LABEL, renderPriorityBadge } from '../../lib/helpers.js';
 import { button, emptyState, h, progressBar, toast } from '../../ui.js';
 import { STATE_COLORS } from '../../lib/cat-list-stats.js';
-import { ico } from '../../components/icons.js';
+import { ico, catIcon } from '../../components/icons.js';
 
 interface TopicQuestionItem {
   question: Question;
@@ -245,7 +245,7 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
         h(
           'div',
           { className: 'all-q__meta-row' },
-          h('span', { className: 'all-q__cat-tag' }, cat.title),
+          h('span', { className: 'all-q__cat-tag' }, catIcon(cat.icon, 12), cat.title),
           h('span', { className: `all-q__lvl-tag all-q__lvl-tag--${cat.level}` }, LEVEL_LABEL[cat.level] ?? cat.level),
           priorityBadge ?? h('span', { className: 'priority-badge priority-badge--low' }, 'بدون اولویت'),
         ),

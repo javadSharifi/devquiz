@@ -18,7 +18,7 @@ import type { AppState } from '../../state.js';
 import { backButton, renderPriorityBadge } from '../../lib/helpers.js';
 import { button, emptyState, h, progressBar, toast } from '../../ui.js';
 import { computeKnownCount, computeProgress, STATE_COLORS } from '../../lib/cat-list-stats.js';
-import { ico } from '../../components/icons.js';
+import { ico, catIcon } from '../../components/icons.js';
 
 /** Pre-resolved DOM references for a single category-list row + the shared header bits. */
 export interface CatListItemRefs {
@@ -64,7 +64,7 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
   wrap.appendChild(
     h('div', { className: 'view-head' },
       backButton(() => store.dispatch({ type: 'SELECT_CATEGORY', categoryId: null, queue: [] })),
-      h('h2', { className: 'view__title view__title--sm' }, cat.title),
+      h('h2', { className: 'view__title view__title--sm view__title--icon' }, catIcon(cat.icon, 20), cat.title),
     ),
   );
   const bar = progressBar(done, total);

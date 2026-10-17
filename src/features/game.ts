@@ -10,7 +10,7 @@ import type { QuestionLevel, Topic } from '../types.js';
 import type { AppState } from '../state.js';
 import { faNum } from '../types.js';
 import { button, confetti, emptyState, errorCard, h, progressBar } from '../ui.js';
-import { ico, type IconName } from '../components/icons.js';
+import { ico, catIcon, type IconName } from '../components/icons.js';
 
 const LEVEL_INFO: { level: QuestionLevel; label: string; tagline: string; icon: IconName; cssClass: string }[] = [
   { level: 'junior', label: 'جونیور', tagline: 'مبانی و اصول پایه', icon: 'sprout', cssClass: 'level-pick__card--junior' },
@@ -217,7 +217,7 @@ function renderAllCategories(state: AppState, topic: Topic): HTMLElement {
       h(
         'span',
         { className: 'cat-card__top' },
-        h('span', { className: 'cat-card__icon', attrs: { 'aria-hidden': 'true' } }, ico(isDone ? 'check' : 'folder', 20)),
+        h('span', { className: 'cat-card__icon', attrs: { 'aria-hidden': 'true' } }, isDone ? ico('check', 20) : catIcon(cat.icon, 20)),
         h('span', { className: 'cat-card__count' }, `${faNum(done)}/${faNum(total)}`),
       ),
       h('span', { className: 'cat-card__title' }, cat.title),

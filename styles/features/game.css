@@ -879,3 +879,12 @@
 .all-q__answer-meta {
   margin-bottom: 6px;
 }
+
+.view__title--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.view__title--icon .ico {
+  color: var(--accent-strong);
+}
