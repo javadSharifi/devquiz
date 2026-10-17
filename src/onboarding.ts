@@ -16,47 +16,25 @@ import {
 } from './storage.js';
 import { type Theme, type TopicCatalogItem, faDigits } from './types.js';
 import { button, errorCard, h, skeletonList, toast } from './ui.js';
-
-const ICON_FALLBACK: Record<string, string> = {
-  javascript: '🟨',
-  typescript: '🟦',
-  react: '⚛️',
-  vue: '🟢',
-  node: '🟩',
-  python: '🐍',
-  go: '🔵',
-  rust: '🦀',
-  java: '☕',
-  css: '🎨',
-  html: '🌐',
-  sql: '🗄️',
-  docker: '🐳',
-  git: '🔧',
-};
+import { ico } from './components/icons.js';
 
 const ICON_URL_RE = /^(https?:|data:|\/\/)/i;
 
-function pickIcon(item: TopicCatalogItem): string {
-  if (item.icon && item.icon.length > 0) return item.icon;
-  return ICON_FALLBACK[item.id] ?? '📘';
-}
-
 function topicIconEl(item: TopicCatalogItem): HTMLElement {
-  const value = pickIcon(item);
-  if (ICON_URL_RE.test(value)) {
+  if (item.icon && ICON_URL_RE.test(item.icon)) {
     return h('img', {
       className: 'ob-card__icon ob-card__icon--img',
-      attrs: { src: value, alt: '', 'aria-hidden': 'true', loading: 'lazy', decoding: 'async' },
+      attrs: { src: item.icon, alt: '', 'aria-hidden': 'true', loading: 'lazy', decoding: 'async' },
     });
   }
-  return h('span', { className: 'ob-card__icon', attrs: { 'aria-hidden': 'true' } }, value);
+  return h('span', { className: 'ob-card__icon', attrs: { 'aria-hidden': 'true' } }, ico('code', 24));
 }
 
 const root = document.getElementById('onboarding');
 if (!root) throw new Error('missing #onboarding root');
 
 const grid = h('div', { className: 'ob-grid' });
-const startBtn = button('شروع 🚀', () => void finish(), { variant: 'primary', className: 'btn--wide btn--big' });
+const startBtn = button(['شروع', ico('play', 16)], () => void finish(), { variant: 'primary', className: 'btn--wide btn--big' });
 startBtn.disabled = true;
 
 let downloadedCount = 0;
@@ -65,7 +43,7 @@ root.append(
   h(
     'header',
     { className: 'ob-hero' },
-    h('div', { className: 'ob-hero__logo', attrs: { 'aria-hidden': 'true' } }, '⚡'),
+    h('div', { className: 'ob-hero__logo', attrs: { 'aria-hidden': 'true' } }, ico('bolt', 38)),
     h('h1', { className: 'ob-hero__title' }, 'به دِوکوئیز خوش اومدی'),
     h(
       'p',
@@ -73,7 +51,12 @@ root.append(
       'سوالات مصاحبه فنی رو مثل یه بازی تمرین کن — فلش‌کارت، استریک روزانه و امتیاز.',
     ),
   ),
-  h('h2', { className: 'section-title' }, 'اول یک یا چند موضوع رو دانلود کن'),
+  h(
+    'div',
+    { className: 'ob-step' },
+    h('span', { className: 'ob-step__num', attrs: { 'aria-hidden': 'true' } }, '۱'),
+    h('h2', { className: 'ob-step__title' }, 'یک یا چند موضوع را دانلود کن'),
+  ),
   grid,
   h('footer', { className: 'ob-footer' }, startBtn),
 );
@@ -118,7 +101,7 @@ async function loadCatalog(): Promise<void> {
 function topicCard(item: TopicCatalogItem, alreadyDownloaded: boolean): HTMLElement {
   const status = h('span', { className: 'ob-card__status' });
   const btn = button(
-    alreadyDownloaded ? '✓ دانلود شد' : 'دانلود',
+    alreadyDownloaded ? [ico('check', 16), ' دانلود شد'] : 'دانلود',
     () => void download(),
     { variant: alreadyDownloaded ? 'ghost' : 'primary', ariaLabel: `دانلود ${item.title}` },
   );
@@ -129,14 +112,14 @@ function topicCard(item: TopicCatalogItem, alreadyDownloaded: boolean): HTMLElem
     btn.replaceChildren(h('span', { className: 'spinner', attrs: { 'aria-hidden': 'true' } }), ' در حال دانلود…');
     try {
       await downloadTopic(item);
-      btn.replaceChildren('✓ دانلود شد');
+      btn.replaceChildren(ico('check', 16), ' دانلود شد');
       btn.classList.add('btn--done');
       status.textContent = '';
       downloadedCount++;
       const active = await getActiveTopicId();
       if (!active) await setActiveTopicId(item.id);
       updateStart();
-      toast(`«${item.title}» آماده‌ست ✅`, { kind: 'success', duration: 2200 });
+      toast(`«${item.title}» آماده‌ست`, { kind: 'success', duration: 2200 });
     } catch (e) {
       btn.disabled = false;
       btn.replaceChildren('تلاش دوباره');
@@ -146,15 +129,17 @@ function topicCard(item: TopicCatalogItem, alreadyDownloaded: boolean): HTMLElem
 
   return h(
     'div',
-    { className: 'ob-card glass' },
-    h('div', { className: 'ob-card__head' },
-      topicIconEl(item),
+    { className: 'ob-card' },
+    topicIconEl(item),
+    h(
+      'div',
+      { className: 'ob-card__body' },
       h('h3', { className: 'ob-card__title' }, item.title),
+      h('p', { className: 'ob-card__desc' }, item.description),
+      h('span', { className: 'ob-card__ver' }, `نسخه ${faDigits(item.version)}`),
+      status,
     ),
-    h('p', { className: 'ob-card__desc' }, item.description),
-    h('span', { className: 'ob-card__ver' }, `نسخه ${faDigits(item.version)}`),
     btn,
-    status,
   );
 }
 
@@ -170,7 +155,7 @@ async function finish(): Promise<void> {
     h(
       'div',
       { className: 'ob-finish' },
-      h('div', { className: 'ob-finish__emoji', attrs: { 'aria-hidden': 'true' } }, '🎉'),
+      h('div', { className: 'ob-finish__emoji', attrs: { 'aria-hidden': 'true' } }, ico('trophy', 56)),
       h('h1', {}, 'همه‌چیز آماده‌ست!'),
       h('p', {}, 'حالا آیکون دِوکوئیز را در نوار ابزار مرورگر بزن و بازی رو شروع کن.'),
       button('بستن این صفحه', () => window.close(), { variant: 'ghost' }),

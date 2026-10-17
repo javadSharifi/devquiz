@@ -15,8 +15,9 @@
 .skeleton {
   position: relative;
   overflow: hidden;
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   background: var(--surface);
+  border: 1px solid var(--border);
 }
 .skeleton::after {
   content: '';
@@ -26,7 +27,7 @@
   background: linear-gradient(
     -90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.06) 50%,
+    rgba(124, 92, 255, 0.12) 50%,
     transparent 100%
   );
   animation: shimmer 1.3s infinite;
@@ -42,8 +43,8 @@
   margin-bottom: 12px;
 }
 .skeleton--row {
-  height: 52px;
+  height: 60px;
 }
 .skeleton--card {
-  height: 84px;
+  height: 88px;
 }

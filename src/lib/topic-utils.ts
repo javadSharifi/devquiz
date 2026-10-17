@@ -39,7 +39,7 @@ export function getMergedTopic(topicId: string): Topic | null {
         id: cq.categoryId,
         title: cq.categoryTitle ?? 'سوال‌های من',
         level: cq.categoryLevel ?? 'junior',
-        icon: '📝',
+        icon: '',
         questions: [],
       };
       merged.categories.push(cat);

@@ -21,6 +21,7 @@ import type { Category, Question, QuestionLevel, QuestionState, TopicCatalogItem
 import { LEVEL_LABEL, renderPriorityBadge, topicIconEl } from '../lib/helpers.js';
 import { button, emptyState, h, toast } from '../ui.js';
 import { STATE_COLORS } from '../lib/cat-list-stats.js';
+import { ico } from '../components/icons.js';
 
 export interface SearchQuestionResult {
   question: Question;
@@ -54,11 +55,11 @@ export function renderSearch(state: AppState): HTMLElement {
       h(
         'div',
         { className: 'view-head__titles' },
-        h('h2', { className: 'view__title' }, '🔍 جستجو در همه سؤال‌ها'),
+        h('h2', { className: 'view__title' }, 'جستجو'),
         h(
           'p',
           { className: 'view__sub' },
-          'جستجو در میان تمام سؤالات و پاسخ‌های تمام موضوعات (JSONها)',
+          'در سؤال‌ها و پاسخ‌های همهٔ موضوع‌ها بگرد',
         ),
       ),
     ),
@@ -101,7 +102,7 @@ export function renderSearch(state: AppState): HTMLElement {
         h(
           'span',
           {},
-          `💡 ${faNum(undownloadedCatalogItems.length)} موضوع هنوز دانلود نشده‌اند. برای جستجوی کامل در تمام JSONها می‌توانید آن‌ها را دریافت کنید:`,
+          `${faNum(undownloadedCatalogItems.length)} موضوع هنوز دانلود نشده‌اند. برای جستجوی کامل در تمام JSONها می‌توانید آن‌ها را دریافت کنید:`,
         ),
       ),
       button(
@@ -120,7 +121,7 @@ export function renderSearch(state: AppState): HTMLElement {
   let selectedStateFilter: QuestionState | 'all' = 'all';
   let sortMode: 'priority' | 'relevance' | 'topic' = 'priority';
 
-  const searchBar = h('div', { className: 'search-bar-wrap' });
+  const searchBar = h('div', { className: 'search-bar-wrap' }, h('span', { className: 'search-bar__icon', attrs: { 'aria-hidden': 'true' } }, ico('search', 18)));
   const inputEl = h('input', {
     className: 'field__input search-bar__input',
     attrs: {
@@ -151,7 +152,7 @@ export function renderSearch(state: AppState): HTMLElement {
         renderResults();
       },
     },
-    '✕',
+    ico('close', 16),
   );
 
   searchBar.append(inputEl, clearBtn);
@@ -191,9 +192,9 @@ export function renderSearch(state: AppState): HTMLElement {
       },
     },
     h('option', { attrs: { value: 'all' } }, 'همه سطوح'),
-    h('option', { attrs: { value: 'junior' } }, 'جونیور 🌱'),
-    h('option', { attrs: { value: 'mid' } }, 'میدلول ⚙️'),
-    h('option', { attrs: { value: 'senior' } }, 'سنیور 🧭'),
+    h('option', { attrs: { value: 'junior' } }, 'جونیور'),
+    h('option', { attrs: { value: 'mid' } }, 'میدلول'),
+    h('option', { attrs: { value: 'senior' } }, 'سنیور'),
   );
   filterControls.appendChild(levelSelect);
 
@@ -208,9 +209,9 @@ export function renderSearch(state: AppState): HTMLElement {
         renderResults();
       },
     },
-    h('option', { attrs: { value: 'priority' } }, 'مرتب‌سازی: بیشترین درصد اهمیت 🎯'),
-    h('option', { attrs: { value: 'relevance' } }, 'مرتب‌سازی: مرتبط‌ترین 🔍'),
-    h('option', { attrs: { value: 'topic' } }, 'مرتب‌سازی: بر اساس موضوع 📚'),
+    h('option', { attrs: { value: 'priority' } }, 'مرتب‌سازی: بیشترین درصد اهمیت'),
+    h('option', { attrs: { value: 'relevance' } }, 'مرتب‌سازی: مرتبط‌ترین'),
+    h('option', { attrs: { value: 'topic' } }, 'مرتب‌سازی: بر اساس موضوع'),
   );
   filterControls.appendChild(sortSelect);
 
@@ -290,7 +291,7 @@ export function renderSearch(state: AppState): HTMLElement {
     if (items.length === 0) {
       resultsContainer.appendChild(
         emptyState(
-          '🔍',
+          ico('search', 42),
           'سؤالی پیدا نشد',
           `عبارت دیگری را امتحان کنید یا فیلترها را تغییر دهید.`,
         ),
@@ -347,23 +348,23 @@ function buildSearchResultItem(
             h(
               'div',
               { className: 'cat-list__actions-inline' },
-              button('✅ بلدم', () => updateState('know'), {
+              button([ico('checkCircle', 16), 'بلدم'], () => updateState('know'), {
                 variant: 'soft',
                 className: 'act act--know',
                 ariaLabel: 'بلدم',
               }),
-              button('📚 یاد می‌گیرم', () => updateState('want_to_learn'), {
+              button([ico('book', 16), 'یاد می‌گیرم'], () => updateState('want_to_learn'), {
                 variant: 'soft',
                 className: 'act act--learn',
                 ariaLabel: 'یاد می‌گیرم',
               }),
-              button('⏭ رد کن', () => updateState('skip'), {
+              button([ico('skip', 16), 'رد کن'], () => updateState('skip'), {
                 variant: 'soft',
                 className: 'act act--skip',
                 ariaLabel: 'رد کن',
               }),
               button(
-                '▶ تمرین این موضوع',
+                [ico('play', 14), 'تمرین این موضوع'],
                 () => {
                   store.dispatch({ type: 'SET_ACTIVE_TOPIC', topicId: item.topicId });
                   store.dispatch({ type: 'SET_TAB', tab: 'game' });
@@ -385,7 +386,7 @@ function buildSearchResultItem(
       'div',
       { className: 'search-item__meta-row' },
       h('span', { className: 'search-item__topic-chip' }, topicIconEl({ id: item.topicId, icon: item.topicIcon }), ` ${item.topicTitle}`),
-      h('span', { className: 'search-item__cat-chip' }, `${item.category.icon} ${item.category.title}`),
+      h('span', { className: 'search-item__cat-chip' }, [ico('folder', 12), ` ${item.category.title}`]),
       h('span', { className: `all-q__lvl-tag all-q__lvl-tag--${item.category.level}` }, LEVEL_LABEL[item.category.level] ?? item.category.level),
       priorityBadge ?? h('span', { className: 'priority-badge priority-badge--low' }, 'بدون اولویت'),
     ),
@@ -423,10 +424,10 @@ function buildSearchResultItem(
     });
     toast(
       newState === 'know'
-        ? 'به بلدم منتقل شد ✅'
+        ? 'به بلدم منتقل شد'
         : newState === 'want_to_learn'
-          ? 'به لیست یادگیری اضافه شد 📚'
-          : 'رد شد ⏭',
+          ? 'به لیست یادگیری اضافه شد'
+          : 'رد شد',
       { kind: 'success', duration: 1500 },
     );
   }
@@ -495,7 +496,7 @@ async function downloadRemainingTopics(
     }
   }
 
-  toast(`${faNum(successCount)} موضوع با موفقیت دانلود شد 🎉`, { kind: 'success', duration: 3000 });
+  toast(`${faNum(successCount)} موضوع با موفقیت دانلود شد`, { kind: 'success', duration: 3000 });
   bannerEl.remove();
   store.dispatch({ type: 'DATA_CHANGED' });
 }

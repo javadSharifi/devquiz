@@ -5,6 +5,9 @@
  * ============================================================ */
 
 import { h } from './hyperscript.js';
+import { ico } from './icons.js';
+
+const TOAST_ICON = { info: 'bolt', success: 'checkCircle', error: 'alert' } as const;
 
 let activeToast: { el: HTMLElement; timer: ReturnType<typeof setTimeout> } | null = null;
 
@@ -24,6 +27,7 @@ export function toast(message: string, opts: ToastOpts = {}): void {
   const el = h(
     'div',
     { className: `toast toast--${opts.kind ?? 'info'}`, attrs: { role: 'status', 'aria-live': 'polite' } },
+    h('span', { className: 'toast__icon', attrs: { 'aria-hidden': 'true' } }, ico(TOAST_ICON[opts.kind ?? 'info'], 18)),
     h('span', { className: 'toast__msg' }, message),
     opts.actionLabel && opts.onAction
       ? h(

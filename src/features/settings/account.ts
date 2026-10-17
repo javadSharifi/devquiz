@@ -17,7 +17,7 @@ import {
   setApiBaseUrl,
 } from '../../storage.js';
 import { faNum } from '../../types.js';
-import { platform } from '../../platform/index.js';
+import { ICON, icon, settingsSection } from './section.js';
 
 function formatRelativeTime(timestamp: number): string {
   const diffSec = Math.floor((Date.now() - timestamp) / 1000);
@@ -31,12 +31,8 @@ function formatRelativeTime(timestamp: number): string {
   return `${faNum(diffDays)} روز پیش`;
 }
 
-export function renderAccountSection(state: AppState): DocumentFragment {
-  const frag = document.createDocumentFragment();
-
-  frag.appendChild(h('h3', { className: 'section-title' }, 'حساب کاربری و همگام‌سازی ابری'));
-
-  const card = h('div', { className: 'settings-card account-card' });
+export function renderAccountSection(state: AppState): HTMLElement {
+  const card = h('div', { className: `account-card${state.authUser ? ' account-card--hero' : ' st-card st-card--pad'}` });
 
   if (state.authUser) {
     // ----------------------------------------------------
@@ -45,82 +41,49 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     const user = state.authUser;
     const initial = (user.name || user.email || 'ک')[0]?.toUpperCase() || 'U';
 
-    const profileTop = h(
-      'div',
-      { className: 'profile-header' },
+    card.appendChild(
       h(
         'div',
-        { className: 'profile-avatar-wrap' },
+        { className: 'profile-header' },
         h('div', { className: 'profile-avatar' }, initial),
-        h('span', { className: 'profile-online-badge', attrs: { title: 'متصل به سرور لبه Cloudflare' } }),
-      ),
-      h(
-        'div',
-        { className: 'profile-identity' },
         h(
           'div',
-          { className: 'profile-name-row' },
+          { className: 'profile-identity' },
           h('span', { className: 'profile-name' }, user.name || 'کاربر DevQuiz'),
-          h('span', { className: 'profile-verified-badge' }, '✓ همگام'),
+          h('span', { className: 'profile-email' }, user.email),
         ),
-        h('div', { className: 'profile-email' }, user.email),
+        h('span', { className: 'profile-verified-badge' }, h('span', { className: 'sync-dot' }), 'همگام'),
       ),
     );
-    card.appendChild(profileTop);
 
-    // Stats Grid
-    const statsGrid = h(
-      'div',
-      { className: 'profile-stats-grid' },
+    card.appendChild(
       h(
         'div',
-        { className: 'profile-stat-item' },
-        h('span', { className: 'profile-stat-icon' }, '⚡'),
-        h('span', { className: 'profile-stat-value' }, `${faNum(state.gamification?.xp || 0)} XP`),
-        h('span', { className: 'profile-stat-label' }, 'مجموع امتیاز'),
-      ),
-      h(
-        'div',
-        { className: 'profile-stat-item' },
-        h('span', { className: 'profile-stat-icon' }, '🔥'),
-        h('span', { className: 'profile-stat-value' }, `${faNum(state.gamification?.streak || 0)} روز`),
-        h('span', { className: 'profile-stat-label' }, 'زنجیره پیوسته'),
-      ),
-      h(
-        'div',
-        { className: 'profile-stat-item' },
-        h('span', { className: 'profile-stat-icon' }, '☁️'),
-        h('span', { className: 'profile-stat-value' }, 'Cloudflare D1'),
-        h('span', { className: 'profile-stat-label' }, 'پایگاه داده لبه'),
+        { className: 'profile-stats-grid' },
+        h(
+          'div',
+          { className: 'profile-stat-item profile-stat-item--xp' },
+          h('span', { className: 'profile-stat-value' }, faNum(state.gamification?.xp || 0)),
+          h('span', { className: 'profile-stat-label' }, 'امتیاز XP'),
+        ),
+        h(
+          'div',
+          { className: 'profile-stat-item profile-stat-item--streak' },
+          h('span', { className: 'profile-stat-value' }, `${faNum(state.gamification?.streak || 0)} روز`),
+          h('span', { className: 'profile-stat-label' }, 'زنجیره پیوسته'),
+        ),
       ),
     );
-    card.appendChild(statsGrid);
 
-    // Sync Status Bar
     const lastSyncText = state.lastSyncedAt
       ? `آخرین همگام‌سازی: ${formatRelativeTime(state.lastSyncedAt)}`
       : 'همگام‌سازی خودکار در جریان است.';
 
-    const syncBar = h(
-      'div',
-      { className: 'profile-sync-bar' },
-      h(
-        'div',
-        { className: 'sync-status-indicator' },
-        h('span', { className: `sync-dot ${state.isSyncing ? 'sync-dot--pulsing' : 'sync-dot--active'}` }),
-        h('span', { className: 'sync-meta-text' }, state.isSyncing ? 'در حال همگام‌سازی با سرور...' : lastSyncText),
-      ),
-    );
-    card.appendChild(syncBar);
-
-    // Actions Row
-    const actions = h('div', { className: 'profile-actions-row' });
-
     const syncBtn = button(
-      state.isSyncing ? 'در حال ارسال و دریافت... ⏳' : 'همگام‌سازی ابری اکنون 🔄',
+      [icon(ICON.sync, 16), state.isSyncing ? 'در حال همگام‌سازی…' : 'همگام‌سازی اکنون'],
       async () => {
         syncBtn.disabled = true;
-        toast('در حال تبادل اطلاعات با Cloudflare D1...', { kind: 'info' });
+        toast('در حال تبادل اطلاعات با سرور...', { kind: 'info' });
         const res = await performFullSync();
         syncBtn.disabled = false;
         if (res.success) {
@@ -137,7 +100,7 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     );
 
     const logoutBtn = button(
-      'خروج از حساب',
+      [icon(ICON.logout, 16), 'خروج'],
       async () => {
         if (!confirm('آیا مایل به خروج از حساب کاربری هستید؟ داده‌های محلی فعلی شما حفظ می‌شوند.')) {
           return;
@@ -149,9 +112,11 @@ export function renderAccountSection(state: AppState): DocumentFragment {
       { variant: 'ghost', className: 'btn--logout-action' },
     );
 
-    actions.appendChild(syncBtn);
-    actions.appendChild(logoutBtn);
-    card.appendChild(actions);
+    card.appendChild(h('div', { className: 'profile-actions-row' }, syncBtn, logoutBtn));
+    card.appendChild(
+      h('span', { className: `profile-sync-meta${state.isSyncing ? ' profile-sync-meta--busy' : ''}` },
+        state.isSyncing ? 'در حال همگام‌سازی با سرور...' : lastSyncText),
+    );
   } else {
     // ----------------------------------------------------
     // Unauthenticated: Sleek Login & Register Flow
@@ -161,17 +126,11 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     const heroBanner = h(
       'div',
       { className: 'auth-hero-banner' },
-      h(
-        'div',
-        { className: 'auth-badge-pill' },
-        h('span', { className: 'auth-badge-dot' }),
-        'سرور ابری لبه Cloudflare',
-      ),
-      h('h4', { className: 'auth-hero-title' }, 'همگام‌سازی و ذخیره ابری پیشرفت'),
+      h('h4', { className: 'auth-hero-title' }, 'پیشرفتت را همه‌جا همراه داشته باش'),
       h(
         'p',
         { className: 'auth-hero-desc' },
-        'با حساب رایگان DevQuiz، سوالات مطالعه‌شده، امتیازات و کارت‌های شما در همه دستگاه‌ها محفوظ می‌ماند.',
+        'با یک حساب رایگان، سؤال‌ها، امتیازها و کارت‌هایت روی همه دستگاه‌ها همگام می‌شوند.',
       ),
     );
     card.appendChild(heroBanner);
@@ -185,7 +144,7 @@ export function renderAccountSection(state: AppState): DocumentFragment {
         className: 'auth-tab auth-tab--active',
         onClick: () => switchMode('login'),
       },
-      '🔑 ورود به حساب',
+      'ورود',
     );
     const tabRegister = h(
       'button',
@@ -194,7 +153,7 @@ export function renderAccountSection(state: AppState): DocumentFragment {
         className: 'auth-tab',
         onClick: () => switchMode('register'),
       },
-      '✨ ساخت حساب جدید',
+      'ساخت حساب',
     );
 
     navTabs.appendChild(tabLogin);
@@ -213,7 +172,7 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     const nameGroup = h('div', { className: 'auth-field-group auth-field-group--name', style: { display: 'none' } });
     const nameLabel = h('label', { className: 'auth-field-label', attrs: { for: 'auth-name' } }, 'نام نمایشی');
     const nameInputWrap = h('div', { className: 'auth-input-wrap' });
-    const nameIcon = h('span', { className: 'auth-input-icon' }, '👤');
+    const nameIcon = h('span', { className: 'auth-input-icon' }, icon(ICON.user, 16));
     const nameInput = h('input', {
       type: 'text',
       id: 'auth-name',
@@ -229,7 +188,7 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     const emailGroup = h('div', { className: 'auth-field-group' });
     const emailLabel = h('label', { className: 'auth-field-label', attrs: { for: 'auth-email' } }, 'ایمیل');
     const emailInputWrap = h('div', { className: 'auth-input-wrap' });
-    const emailIcon = h('span', { className: 'auth-input-icon' }, '✉️');
+    const emailIcon = h('span', { className: 'auth-input-icon' }, icon(ICON.mail, 16));
     const emailInput = h('input', {
       type: 'email',
       id: 'auth-email',
@@ -245,7 +204,7 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     const passGroup = h('div', { className: 'auth-field-group' });
     const passLabel = h('label', { className: 'auth-field-label', attrs: { for: 'auth-pass' } }, 'رمز عبور (حداقل ۶ کاراکتر)');
     const passInputWrap = h('div', { className: 'auth-input-wrap' });
-    const passIcon = h('span', { className: 'auth-input-icon' }, '🔒');
+    const passIcon = h('span', { className: 'auth-input-icon' }, icon(ICON.lock, 16));
     const passInput = h('input', {
       type: 'password',
       id: 'auth-pass',
@@ -259,16 +218,12 @@ export function renderAccountSection(state: AppState): DocumentFragment {
         className: 'auth-pass-toggle',
         attrs: { 'aria-label': 'نمایش یا پنهان کردن رمز' },
         onClick: () => {
-          if (passInput.type === 'password') {
-            passInput.type = 'text';
-            togglePassBtn.textContent = '🙈';
-          } else {
-            passInput.type = 'password';
-            togglePassBtn.textContent = '👁️';
-          }
+          const show = passInput.type === 'password';
+          passInput.type = show ? 'text' : 'password';
+          togglePassBtn.replaceChildren(icon(show ? ICON.eyeOff : ICON.eye, 16));
         },
       },
-      '👁️',
+      icon(ICON.eye, 16),
     );
     passInputWrap.appendChild(passIcon);
     passInputWrap.appendChild(passInput);
@@ -301,7 +256,7 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     const hintText = h(
       'div',
       { className: 'auth-hint-text' },
-      '⚡ ثبت‌نام ۱۰۰٪ رایگان و آنی بدون نیاز به ایمیل تاییدیه',
+      'ثبت‌نام رایگان است و نیازی به تأیید ایمیل ندارد.',
     );
 
     const errorBox = h('div', { className: 'auth-error-box', style: { display: 'none' } });
@@ -376,14 +331,14 @@ export function renderAccountSection(state: AppState): DocumentFragment {
           token: authSession.token,
         });
 
-        toast(`خوش آمدید ${authSession.user.name} 🎉`, { kind: 'success' });
+        toast(`خوش آمدید ${authSession.user.name}`, { kind: 'success' });
 
         // Trigger initial cloud sync
         void performFullSync().then((res) => {
           if (res.success) {
             if (res.autoDownloadedCount && res.autoDownloadedCount > 0) {
               toast(
-                `پیشرفت شما همگام شد و ${faNum(res.autoDownloadedCount)} موضوع به‌طور خودکار دانلود شدند 🚀`,
+                `پیشرفت شما همگام شد و ${faNum(res.autoDownloadedCount)} موضوع به‌طور خودکار دانلود شدند`,
                 { kind: 'success' },
               );
             } else if (res.syncedCount > 0) {
@@ -409,7 +364,7 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     // Advanced: Custom Server URL Setting
     // ----------------------------------------------------
     const advancedDetails = h('details', { className: 'auth-advanced-details' });
-    const summary = h('summary', { className: 'auth-advanced-summary' }, 'تنظیمات سرور Cloudflare (اختیاری)');
+    const summary = h('summary', { className: 'auth-advanced-summary' }, 'تنظیمات سرور (اختیاری)');
     const advContent = h('div', { className: 'auth-advanced-content' });
 
     const urlLabel = h('label', { className: 'auth-field-label', attrs: { for: 'api-url-input' } }, 'آدرس سرور API');
@@ -438,6 +393,5 @@ export function renderAccountSection(state: AppState): DocumentFragment {
     card.appendChild(advancedDetails);
   }
 
-  frag.appendChild(card);
-  return frag;
+  return settingsSection('حساب کاربری', card);
 }

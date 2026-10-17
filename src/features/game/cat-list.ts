@@ -18,6 +18,7 @@ import type { AppState } from '../../state.js';
 import { backButton, renderPriorityBadge } from '../../lib/helpers.js';
 import { button, emptyState, h, progressBar, toast } from '../../ui.js';
 import { computeKnownCount, computeProgress, STATE_COLORS } from '../../lib/cat-list-stats.js';
+import { ico } from '../../components/icons.js';
 
 /** Pre-resolved DOM references for a single category-list row + the shared header bits. */
 export interface CatListItemRefs {
@@ -56,20 +57,19 @@ export function applyCategoryItemState(
 export function renderCategoryList(state: AppState, topic: Topic, categoryId: string): HTMLElement {
   const wrap = h('div', { className: 'view view--cat-list' });
   const cat = topic.categories.find((c) => c.id === categoryId);
-  if (!cat) return emptyState('🗂️', 'دسته پیدا نشد', '');
+  if (!cat) return emptyState(ico('folder', 42), 'دسته پیدا نشد', '');
 
   const { done, total } = categoryStats(cat, state.activeTopicId, state.userStates);
 
   wrap.appendChild(
     h('div', { className: 'view-head' },
       backButton(() => store.dispatch({ type: 'SELECT_CATEGORY', categoryId: null, queue: [] })),
-      h('h2', { className: 'view__title view__title--sm' }, `${cat.icon} ${cat.title}`),
+      h('h2', { className: 'view__title view__title--sm' }, cat.title),
     ),
   );
   const bar = progressBar(done, total);
-  wrap.appendChild(bar);
   const countEl = h('p', { className: 'cat-list__count' }, `${faNum(done)} از ${faNum(total)} پاسخ`);
-  wrap.appendChild(countEl);
+  wrap.appendChild(h('div', { className: 'cl-summary' }, countEl, bar));
   const barFillEl = (bar.querySelector('.progress__fill') as HTMLElement | null)
     ?? (h('div', { className: 'progress__fill' }) as HTMLElement);
   const formatCount = (k: number, t: number): string => `${faNum(k)} از ${faNum(t)} پاسخ`;
@@ -85,18 +85,18 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
   wrap.appendChild(
     h('div', { className: 'cat-list__actions' },
       nonKnowIds.length > 0
-        ? button('▶ ادامه یادگیری', () => {
+        ? button([ico('play', 14), 'ادامه یادگیری'], () => {
             store.dispatch({ type: 'SET_QUEUE', queue: nonKnowIds, index: 0 });
-          }, { variant: 'primary', className: 'btn--wide btn--big' })
-        : h('p', { className: 'cat-list__all-done' }, '✅ همه رو بلدی!'),
-      button('مرور همه', () => {
+          }, { variant: 'primary', className: 'cl-actions__main' })
+        : h('p', { className: 'cat-list__all-done' }, [ico('checkCircle', 16), ' همه رو بلدی!']),
+      button([ico('flip', 14), 'مرور همه'], () => {
         store.dispatch({ type: 'SET_QUEUE', queue: allIds, index: 0 });
-      }, { variant: 'ghost', className: 'btn--wide' }),
+      }, { variant: 'ghost', className: 'cl-actions__side' }),
     ),
   );
 
   if (total === 0) {
-    wrap.appendChild(emptyState('📭', 'سوالی نیست', 'این دسته خالیه'));
+    wrap.appendChild(emptyState(ico('inbox', 42), 'سوالی نیست', 'این دسته خالیه'));
     return wrap;
   }
 
@@ -120,9 +120,9 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
             body.appendChild(renderCardAnswer(q.answer, q.priority));
             body.appendChild(
               h('div', { className: 'cat-list__actions-inline' },
-                button('✅ بلدم', () => setQState('know'), { variant: 'soft', className: 'act act--know', ariaLabel: 'بلدم' }),
-                button('📚 یاد می‌گیرم', () => setQState('want_to_learn'), { variant: 'soft', className: 'act act--learn', ariaLabel: 'یاد می‌گیرم' }),
-                button('⏭ رد کن', () => setQState('skip'), { variant: 'soft', className: 'act act--skip', ariaLabel: 'رد کن' }),
+                button([ico('checkCircle', 16), 'بلدم'], () => setQState('know'), { variant: 'soft', className: 'act act--know', ariaLabel: 'بلدم' }),
+                button([ico('book', 16), 'یاد می‌گیرم'], () => setQState('want_to_learn'), { variant: 'soft', className: 'act act--learn', ariaLabel: 'یاد می‌گیرم' }),
+                button([ico('skip', 16), 'رد کن'], () => setQState('skip'), { variant: 'soft', className: 'act act--skip', ariaLabel: 'رد کن' }),
               ),
             );
             body.removeAttribute('hidden');
@@ -136,10 +136,11 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
       },
       h('span', { className: 'cat-list__q' }, q.question),
       priorityBadge,
+      h('span', { className: 'cat-list__chev', attrs: { 'aria-hidden': 'true' } }, ico('chevron', 16)),
     );
     const item = h('div', {
       className: `cat-list__item${isDone ? ' cat-list__item--done' : ''}`,
-      style: { borderInlineStart: `3px solid ${color}` },
+      style: { borderInlineStartColor: color },
     }, toggle, body);
     list.appendChild(item);
 
@@ -152,10 +153,10 @@ export function renderCategoryList(state: AppState, topic: Topic, categoryId: st
       applyCategoryItemState(refs, newState, total, newPct, formatCount);
       toast(
         newState === 'know'
-          ? 'به بلدم منتقل شد ✅'
+          ? 'به بلدم منتقل شد'
           : newState === 'want_to_learn'
-            ? 'به لیست یادگیری اضافه شد 📚'
-            : 'رد شد ⏭',
+            ? 'به لیست یادگیری اضافه شد'
+            : 'رد شد',
         { kind: 'success', duration: 1500 },
       );
     }

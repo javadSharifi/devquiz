@@ -138,7 +138,7 @@ function findByClass(node: any, cls: string): any[] {
     expect(items.length).toBe(2); // Only js1 and js2
 
     // Check random question button label mentions topic
-    const btn = findByClass(el, 'btn--wide')[0];
+    const btn = findByClass(el, 'rv-random')[0];
     expect(btn.textContent).toContain('جاوااسکریپت');
   });
 

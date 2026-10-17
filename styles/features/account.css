@@ -1,410 +1,286 @@
 /* ============================================================
  * DevQuiz — styles/features/account.css
- * Cloudflare Account & Progress Cloud Sync UI Styles.
+ * Settings → account block: signed-in profile hero and the
+ * login / register form.
  * ============================================================ */
 
 .account-card {
-  padding: 18px;
-  border-radius: var(--radius-lg, 14px);
-  background: var(--bg-card, rgba(255, 255, 255, 0.04));
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  margin-bottom: 22px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  backdrop-filter: blur(8px);
 }
 
 /* ------------------------------------------------------------
- * 1. Authenticated Profile View
+ * Signed-in profile hero
  * ------------------------------------------------------------ */
+.account-card--hero {
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(124, 92, 255, 0.28) 0%, var(--surface) 70%);
+  border: 1px solid rgba(157, 133, 255, 0.28);
+}
 .profile-header {
   display: flex;
   align-items: center;
   gap: 14px;
 }
-
-.profile-avatar-wrap {
-  position: relative;
-  flex-shrink: 0;
-}
-
 .profile-avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f38020 0%, #e65100 100%);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--fs-20, 20px);
-  font-weight: 800;
-  box-shadow: 0 4px 14px rgba(243, 128, 32, 0.35);
-  border: 2px solid rgba(255, 255, 255, 0.15);
-}
-
-.profile-online-badge {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #22c55e;
-  border: 2px solid var(--bg-card, #1e2230);
-  box-shadow: 0 0 8px #22c55e;
-}
-
-.profile-identity {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  min-width: 0;
-}
-
-.profile-name-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.profile-name {
-  font-size: var(--fs-16, 16px);
-  font-weight: 700;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.profile-verified-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 7px;
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.profile-email {
-  font-size: var(--fs-12, 12px);
-  color: var(--text-faint);
-  direction: ltr;
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Stats Grid */
-.profile-stats-grid {
+  flex: 0 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-md, 10px);
-  padding: 10px 6px;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-size: var(--fs-24);
+  font-weight: 800;
 }
-
-.profile-stat-item {
+.profile-identity {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
   gap: 2px;
 }
-
-.profile-stat-icon {
-  font-size: 16px;
-}
-
-.profile-stat-value {
-  font-size: var(--fs-13, 13px);
+.profile-name {
+  font-size: var(--fs-17);
   font-weight: 700;
-  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-.profile-stat-label {
-  font-size: 10px;
-  color: var(--text-faint);
+.profile-email {
+  direction: ltr;
+  text-align: end;
+  font-size: var(--fs-12);
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-/* Sync Bar */
-.profile-sync-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: var(--radius-md, 8px);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-.sync-status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sync-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 6px #22c55e;
-}
-
-.sync-dot--pulsing {
-  background: #f59e0b;
-  box-shadow: 0 0 8px #f59e0b;
-  animation: pulse 1.2s infinite;
-}
-
-.sync-meta-text {
-  font-size: var(--fs-12, 12px);
-  color: var(--text-faint);
-}
-
-.profile-actions-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.btn--sync-action {
-  flex: 1;
-  height: 40px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.btn--logout-action {
-  height: 40px;
-  color: var(--danger, #ef4444);
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  transition: all var(--ease, 0.2s);
-}
-
-.btn--logout-action:hover {
-  background: rgba(239, 68, 68, 0.16);
-  border-color: rgba(239, 68, 68, 0.35);
-  color: #ff6b6b;
-}
-
-/* ------------------------------------------------------------
- * 2. Unauthenticated Login & Register View
- * ------------------------------------------------------------ */
-.auth-hero-banner {
-  text-align: center;
-  padding: 4px 4px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.auth-badge-pill {
+.profile-verified-badge {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 12px;
-  background: rgba(243, 128, 32, 0.12);
-  color: #f38020;
-  border: 1px solid rgba(243, 128, 32, 0.28);
-  border-radius: 20px;
-  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: rgba(61, 220, 132, 0.14);
+  color: var(--success);
+  font-size: var(--fs-11);
   font-weight: 700;
 }
-
-.auth-badge-dot {
+.sync-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #f38020;
-  box-shadow: 0 0 6px #f38020;
+  background: currentColor;
 }
-
-.auth-hero-title {
-  font-size: var(--fs-15, 15px);
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.profile-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: var(--seg-track);
+}
+.profile-stat-value {
+  font-size: var(--fs-18);
   font-weight: 800;
-  color: var(--text);
-  margin: 0;
 }
-
-.auth-hero-desc {
-  font-size: var(--fs-12, 12px);
-  color: var(--text-faint);
-  line-height: 1.6;
-  margin: 0;
-  max-width: 90%;
+.profile-stat-item--xp .profile-stat-value {
+  color: var(--mid);
 }
-
-.auth-tabs {
+.profile-stat-item--streak .profile-stat-value {
+  color: var(--senior);
+}
+.profile-stat-label {
+  font-size: var(--fs-11);
+  color: var(--text-dim);
+}
+.profile-actions-row {
   display: flex;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: var(--radius-md, 10px);
-  padding: 4px;
-  gap: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 10px;
 }
-
-.auth-tab {
-  flex: 1;
-  padding: 8px 12px;
-  font-family: inherit;
-  font-size: var(--fs-13, 13px);
-  font-weight: 700;
+.profile-sync-meta {
+  font-size: var(--fs-11);
   color: var(--text-faint);
-  background: none;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all var(--ease, 0.2s);
-  display: flex;
+}
+.profile-sync-meta--busy {
+  color: var(--mid);
+}
+.btn--sync-action,
+.btn--logout-action {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  min-height: 44px;
+  border-radius: var(--r-md);
+  font-weight: 700;
+}
+.btn--sync-action {
+  flex: 1 1 auto;
+}
+.btn--logout-action {
+  padding-inline: 16px;
+  color: var(--danger);
+  background: rgba(255, 93, 122, 0.1);
+  border: 1px solid rgba(255, 93, 122, 0.3);
+}
+.btn--logout-action:hover:not(:disabled) {
+  background: rgba(255, 93, 122, 0.18);
 }
 
+/* ------------------------------------------------------------
+ * Login / register
+ * ------------------------------------------------------------ */
+.auth-hero-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.auth-hero-title {
+  margin: 0;
+  font-size: var(--fs-16);
+  font-weight: 800;
+}
+.auth-hero-desc {
+  margin: 0;
+  font-size: var(--fs-12_5);
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+.auth-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--r-md);
+  background: var(--seg-track);
+}
+.auth-tab {
+  flex: 1;
+  min-height: 40px;
+  font: inherit;
+  font-size: var(--fs-13);
+  font-weight: 700;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--ease), color var(--ease);
+}
 .auth-tab--active {
-  background: var(--bg-card, #272c3d);
+  background: var(--surface-2);
   color: var(--text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-1);
 }
-
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .auth-field-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
-
 .auth-field-label {
-  font-size: var(--fs-12, 12px);
+  font-size: var(--fs-12);
   font-weight: 600;
-  color: var(--text-muted, #a0aec0);
+  color: var(--text-dim);
 }
-
 .auth-input-wrap {
   position: relative;
   display: flex;
   align-items: center;
 }
-
 .auth-input-icon {
   position: absolute;
-  right: 12px;
-  font-size: 15px;
+  inset-inline-start: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--text-faint);
   pointer-events: none;
-  opacity: 0.6;
 }
-
 .auth-input {
   width: 100%;
-  padding: 10px 38px 10px 12px;
-  background: rgba(0, 0, 0, 0.22);
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 10px 40px;
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md, 8px);
-  font-family: inherit;
-  font-size: var(--fs-13, 13px);
+  border-radius: var(--r-md);
+  font: inherit;
+  font-size: var(--fs-13);
   color: var(--text);
-  transition: border var(--ease, 0.2s), box-shadow var(--ease, 0.2s);
+  transition: border var(--ease), box-shadow var(--ease);
 }
-
-.auth-input[dir="ltr"] {
-  padding-left: 36px;
-}
-
 .auth-input:focus {
   border-color: var(--accent);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(243, 128, 32, 0.2);
+  box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.25);
 }
-
 .auth-pass-toggle {
   position: absolute;
-  left: 10px;
+  inset-inline-end: 4px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
   background: none;
   border: none;
+  border-radius: var(--r-sm);
+  color: var(--text-faint);
   cursor: pointer;
-  font-size: 15px;
-  padding: 4px;
-  opacity: 0.6;
-  transition: opacity 0.2s;
 }
-
 .auth-pass-toggle:hover {
-  opacity: 1;
+  color: var(--text);
 }
-
 .auth-hint-text {
-  font-size: 11px;
+  font-size: var(--fs-11);
   color: var(--text-faint);
   text-align: center;
-  padding: 2px 0;
 }
-
 .auth-error-box {
   padding: 8px 12px;
-  border-radius: var(--radius-md, 8px);
-  background: rgba(239, 68, 68, 0.14);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
-  font-size: var(--fs-12, 12px);
-  line-height: 1.4;
+  border-radius: var(--r-sm);
+  background: rgba(255, 93, 122, 0.12);
+  border: 1px solid rgba(255, 93, 122, 0.3);
+  color: var(--danger);
+  font-size: var(--fs-12);
+  line-height: 1.5;
 }
-
 .btn--auth-action {
   width: 100%;
-  height: 44px;
-  font-size: var(--fs-14, 14px);
+  min-height: 46px;
+  font-size: var(--fs-14);
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: var(--r-md);
 }
-
-/* Advanced Server Settings */
 .auth-advanced-details {
   border-top: 1px solid var(--border);
-  padding-top: 10px;
-  margin-top: 4px;
+  padding-top: 12px;
 }
-
 .auth-advanced-summary {
-  font-size: 11px;
-  color: var(--text-faint);
+  font-size: var(--fs-12);
+  color: var(--text-dim);
   cursor: pointer;
   user-select: none;
-  transition: color 0.2s;
 }
-
 .auth-advanced-summary:hover {
   color: var(--text);
 }
-
 .auth-advanced-content {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 10px;
 }

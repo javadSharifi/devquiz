@@ -22,9 +22,10 @@ export function segmentedGroup<T extends string>(
           attrs: {
             role: 'radio',
             'aria-checked': String(isActive),
-            'aria-label': labels[opt],
+            'aria-label': `${groupLabel}: ${opt}`,
             tabindex: isActive ? '0' : '-1',
           },
+          dataset: { value: opt },
           onClick: () => onPick(opt),
         },
         labels[opt],

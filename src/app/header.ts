@@ -6,6 +6,7 @@
 import { store } from '../state.js';
 import { faNum } from '../types.js';
 import { h } from '../components/hyperscript.js';
+import { ico } from '../components/icons.js';
 import { platform } from '../platform/index.js';
 
 let headerEl: HTMLElement | null = null;
@@ -22,7 +23,7 @@ export function renderHeader(): void {
   streakValueEl = h('span', { className: 'stat__value' }, faNum(gamification.streak));
   xpValueEl = h('span', { className: 'stat__value' }, faNum(gamification.xp));
   headerEl.replaceChildren(
-    h('div', { className: 'brand' }, h('span', { className: 'brand__logo', attrs: { 'aria-hidden': 'true' } }, '⚡'), 'دِوکوئیز'),
+    h('div', { className: 'brand' }, h('span', { className: 'brand__logo', attrs: { 'aria-hidden': 'true' } }, ico('bolt', 18)), 'دِوکوئیز'),
     searchButton(),
     ...(platform.isExtension ? [fullscreenToggle()] : []),
     h(
@@ -31,13 +32,13 @@ export function renderHeader(): void {
       h(
         'div',
         { className: 'stat stat--streak', title: 'استریک روزانه', attrs: { 'aria-label': `استریک: ${faNum(gamification.streak)} روز` } },
-        h('span', { className: 'stat__icon', attrs: { 'aria-hidden': 'true' } }, '🔥'),
+        h('span', { className: 'stat__icon', attrs: { 'aria-hidden': 'true' } }, ico('flame', 16)),
         streakValueEl,
       ),
       h(
         'div',
         { className: 'stat stat--xp', title: 'امتیاز تجربه', attrs: { 'aria-label': `امتیاز: ${faNum(gamification.xp)}` } },
-        h('span', { className: 'stat__icon', attrs: { 'aria-hidden': 'true' } }, '✦'),
+        h('span', { className: 'stat__icon', attrs: { 'aria-hidden': 'true' } }, ico('star', 14)),
         xpValueEl,
         h('span', { className: 'stat__unit' }, 'XP'),
       ),
@@ -68,7 +69,7 @@ function searchButton(): HTMLElement {
         store.dispatch({ type: 'SET_TAB', tab: 'search' });
       },
     },
-    '🔍',
+    ico('search', 18),
   );
 }
 
@@ -87,6 +88,6 @@ function fullscreenToggle(): HTMLElement {
       void platform.tabs.create({ url: platform.runtime.getURL('popup/popup.html?fs=1') });
       window.close();
     },
-  }, isFs ? '✕' : '⛶');
+  }, isFs ? ico('close', 18) : ico('expand', 18));
   return btn;
 }

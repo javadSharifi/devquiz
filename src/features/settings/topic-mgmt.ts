@@ -16,43 +16,71 @@ import {
   setActiveTopicId,
 } from '../../storage.js';
 import { compareVersions } from '../../types.js';
+import { ICON, icon, settingsSection } from './section.js';
 
-export function renderTopicMgmtSection(state: AppState): DocumentFragment {
-  const frag = document.createDocumentFragment();
-  frag.appendChild(h('h3', { className: 'section-title' }, 'مدیریت بازی‌ها'));
-  const topicList = h('div', { className: 'settings-group glass' });
-  for (const [id, t] of Object.entries(state.topics)) {
+export function renderTopicMgmtSection(state: AppState): HTMLElement {
+  const topicList = h('div', { className: 'st-card' });
+  const entries = Object.entries(state.topics);
+  if (entries.length === 0) {
+    topicList.appendChild(h('p', { className: 'st-empty' }, 'هنوز بازی‌ای دانلود نشده است.'));
+  }
+  for (const [id, t] of entries) {
     const active = id === state.activeTopicId;
+    const title = t.meta.title || id;
     topicList.appendChild(
       h(
         'div',
-        { className: `settings-row settings-row--static${active ? ' settings-row--active' : ''}` },
-        h('span', { className: 'settings-row__radio', attrs: { 'aria-hidden': 'true' } }, active ? '●' : '○'),
-        h('span', {
-          style: { cursor: 'pointer', flex: '1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-          onClick: () => {
-            void setActiveTopicId(id);
-            store.dispatch({ type: 'SET_ACTIVE_TOPIC', topicId: id });
-            store.dispatch({ type: 'SET_TAB', tab: 'settings' });
-            toast(`موضوع فعال: ${t.meta.title}`, { duration: 2000 });
+        { className: `topic-row${active ? ' topic-row--active' : ''}` },
+        h(
+          'button',
+          {
+            type: 'button',
+            className: 'topic-row__main',
+            attrs: { 'aria-pressed': String(active) },
+            onClick: () => {
+              if (active) return;
+              void setActiveTopicId(id);
+              store.dispatch({ type: 'SET_ACTIVE_TOPIC', topicId: id });
+              store.dispatch({ type: 'SET_TAB', tab: 'settings' });
+              toast(`موضوع فعال: ${title}`, { duration: 2000 });
+            },
           },
-        }, t.meta.title || id),
-        button('🔄', () => void resetTopicWithConfirm(id, t.meta.title || id), { variant: 'danger', ariaLabel: `ریست ${t.meta.title}`, title: 'ریست پیشرفت این بازی' }),
-        button('🗑', () => void deleteTopicWithConfirm(id, t.meta.title || id), { variant: 'danger', ariaLabel: `حذف ${t.meta.title}`, title: 'حذف کامل این بازی' }),
+          h('span', { className: 'topic-row__radio', attrs: { 'aria-hidden': 'true' } }),
+          h(
+            'span',
+            { className: 'topic-row__text' },
+            h('span', { className: 'topic-row__title' }, title),
+            h('span', { className: 'topic-row__hint' }, active ? 'فعال' : 'برای فعال‌سازی لمس کنید'),
+          ),
+        ),
+        iconButton(ICON.reset, `ریست ${title}`, 'ریست پیشرفت این بازی', () => void resetTopicWithConfirm(id, title)),
+        iconButton(ICON.trash, `حذف ${title}`, 'حذف کامل این بازی', () => void deleteTopicWithConfirm(id, title), true),
       ),
     );
   }
-  frag.appendChild(topicList);
 
   const catalogHost = h('div', { className: 'catalog-host' });
-  frag.appendChild(
-    button('➕ دریافت موضوعات جدید', () => void loadCatalogInto(catalogHost), {
-      variant: 'ghost',
-      className: 'btn--wide',
-    }),
+  const getBtn = h(
+    'button',
+    { type: 'button', className: 'st-dashed', onClick: () => void loadCatalogInto(catalogHost) },
+    icon(ICON.plus, 16),
+    'دریافت موضوعات جدید',
   );
-  frag.appendChild(catalogHost);
-  return frag;
+  return settingsSection('بازی‌ها', topicList, getBtn, catalogHost);
+}
+
+function iconButton(path: string, label: string, title: string, onClick: () => void, danger = false): HTMLButtonElement {
+  return h(
+    'button',
+    {
+      type: 'button',
+      className: `icon-btn${danger ? ' icon-btn--danger' : ''}`,
+      title,
+      attrs: { 'aria-label': label },
+      onClick,
+    },
+    icon(path, 18),
+  );
 }
 
 async function deleteTopicWithConfirm(id: string, title: string): Promise<void> {
@@ -68,7 +96,7 @@ async function deleteTopicWithConfirm(id: string, title: string): Promise<void> 
   store.dispatch({ type: 'REPLACE_DOWNLOADED_VERSIONS', versions });
   store.dispatch({ type: 'REPLACE_USER_STATES', userStates: us });
   store.dispatch({ type: 'DATA_CHANGED' });
-  toast('موضوع حذف شد ✅', { kind: 'success' });
+  toast('موضوع حذف شد', { kind: 'success' });
 }
 
 async function resetTopicWithConfirm(id: string, title: string): Promise<void> {
@@ -111,8 +139,8 @@ export async function loadCatalogInto(host: HTMLElement): Promise<void> {
               store.dispatch({ type: 'REPLACE_TOPICS', topics });
               store.dispatch({ type: 'REPLACE_DOWNLOADED_VERSIONS', versions });
               store.dispatch({ type: 'REPLACE_USER_STATES', userStates: us });
-              btn.textContent = '✓';
-              toast(hasUpdate ? 'موضوع بروزرسانی شد ✅' : 'موضوع دانلود شد ✅', { kind: 'success' });
+              btn.replaceChildren(icon(ICON.check, 16));
+              toast(hasUpdate ? 'موضوع بروزرسانی شد' : 'موضوع دانلود شد', { kind: 'success' });
               if (!store.getState().activeTopicId) {
                 void setActiveTopicId(item.id);
                 store.dispatch({ type: 'SET_ACTIVE_TOPIC', topicId: item.id });
@@ -130,13 +158,17 @@ export async function loadCatalogInto(host: HTMLElement): Promise<void> {
       rows.push(
         h(
           'div',
-          { className: 'settings-row settings-row--static' },
+          { className: 'catalog-row' },
           h(
             'div',
-            { className: 'settings-row__main' },
-            h('span', {}, item.title),
-            hasUpdate ? h('span', { className: 'badge badge--update' }, 'بروزرسانی') : null,
-            h('span', { className: 'settings-row__meta' }, item.description),
+            { className: 'catalog-row__main' },
+            h(
+              'span',
+              { className: 'catalog-row__title' },
+              item.title,
+              hasUpdate ? h('span', { className: 'badge badge--update' }, 'بروزرسانی') : null,
+            ),
+            h('span', { className: 'catalog-row__meta' }, item.description),
           ),
           btn,
         ),
@@ -144,8 +176,8 @@ export async function loadCatalogInto(host: HTMLElement): Promise<void> {
     }
     host.replaceChildren(
       rows.length > 0
-        ? h('div', { className: 'settings-group glass' }, rows)
-        : emptyState('✨', 'همه‌چیز به‌روزه', 'موضوع جدید یا بروزرسانی‌ای موجود نیست.'),
+        ? h('div', { className: 'st-card' }, rows)
+        : emptyState(icon(ICON.check, 42), 'همه‌چیز به‌روزه', 'موضوع جدید یا بروزرسانی‌ای موجود نیست.'),
     );
   } catch (e) {
     host.replaceChildren(

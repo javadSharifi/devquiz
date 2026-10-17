@@ -111,115 +111,168 @@
   text-overflow: ellipsis;
 }
 
+.ag-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ag-head__title {
+  margin: 0;
+  font-size: var(--fs-26);
+  font-weight: 800;
+}
+.ag-head__sub {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-13);
+}
+.ag-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 4px 0;
+}
+.ag-section__title {
+  margin: 0;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+.ag-section__count {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: var(--seg-track);
+  color: var(--text-dim);
+  font-size: var(--fs-10_5);
+  font-weight: 700;
+  text-align: center;
+  line-height: 18px;
+}
+
 .all-games__grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 .game-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  text-align: right;
-  color: var(--text);
-  font-family: inherit;
-  cursor: pointer;
-  transition: all var(--ease);
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  transition: border-color var(--ease), background var(--ease);
 }
 .game-card:hover {
-  border-color: var(--accent);
-  box-shadow: var(--glow-accent);
-}
-.game-card:active {
-  transform: scale(0.97);
+  border-color: var(--glass-border);
 }
 .game-card--active {
   border-color: var(--accent);
-  box-shadow: var(--glow-accent);
+  background: linear-gradient(135deg, rgba(124, 92, 255, 0.14), var(--surface));
 }
 .game-card--update {
   border-color: var(--mid);
-  box-shadow: var(--glow-mid);
+}
+.game-card--new {
+  border-style: dashed;
+  background: transparent;
 }
 .game-card--loading {
-  opacity: 0.85;
+  opacity: 0.9;
 }
-.game-card--clickable {
-  cursor: pointer;
-}
-.game-card--clickable:hover {
-  border-color: var(--accent);
-  box-shadow: var(--glow-accent);
-}
-.game-card--clickable:active {
-  transform: scale(0.97);
-}
-.game-card__update-badge {
-  font-size: var(--fs-9_5);
-  font-weight: 700;
-  color: var(--mid);
-  padding: 2px 6px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 196, 77, 0.15);
-  border: 1px solid rgba(255, 196, 77, 0.35);
-  flex: 0 0 auto;
-}
-.game-card__status {
-  color: var(--text-dim);
-  font-size: var(--fs-11_5);
-}.game-card__head {
+.game-card__main {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
 }
-.game-card__titles {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+.game-card__main:disabled {
+  cursor: default;
+}
+.game-card__main:active:not(:disabled) {
+  transform: scale(0.99);
+}
+.game-card__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-md);
+  background: var(--seg-track);
+}
+.game-card__text {
   flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .game-card__title {
-  font-size: var(--fs-13_5);
+  font-size: var(--fs-14_5);
   font-weight: 700;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.game-card__ver {
-  font-size: var(--fs-10_5);
-  color: var(--text-faint);
-}
-.game-card__active-badge {
-  font-size: var(--fs-9_5);
-  font-weight: 700;
-  color: var(--accent-strong);
-  padding: 2px 6px;
-  border-radius: var(--r-pill);
-  background: rgba(124, 92, 255, 0.15);
-  border: 1px solid rgba(124, 92, 255, 0.35);
-  flex: 0 0 auto;
-}
-.game-card .topic-tile__icon {
-  font-size: var(--fs-24);
-}
-.game-card .topic-tile__icon--img {
-  width: 30px;
-  height: 30px;
-}
-.game-card__meta {
-  display: flex;
-  justify-content: space-between;
+.game-card__sub {
   font-size: var(--fs-11_5);
   color: var(--text-dim);
 }
-.game-card__bar {
-  height: 4px;
+.game-card__sub--desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.6;
+}
+.game-card__sub--busy {
+  color: var(--mid);
+}
+.game-card__trail--add {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(124, 92, 255, 0.16);
+  color: var(--accent-strong);
+}
+.game-card__pct {
+  flex: 0 0 auto;
+  font-size: var(--fs-13);
+  font-weight: 800;
+  color: var(--text-dim);
+}
+.game-card__badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
   border-radius: var(--r-pill);
-  background: var(--surface-2);
+  font-size: var(--fs-11);
+  font-weight: 700;
+}
+.game-card__badge--active {
+  color: #fff;
+  background: var(--accent);
+}
+.game-card__bar {
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--seg-track);
   overflow: hidden;
 }
 .game-card__bar-fill {
@@ -227,22 +280,16 @@
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
   transition: width 0.4s ease;
 }
-.game-card__actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 2px;
-}
 .game-card__update-btn {
   width: 100%;
-  padding: 6px 10px;
-  font-size: var(--fs-12);
-  background: rgba(255, 196, 77, 0.15);
+  min-height: 40px;
+  font-size: var(--fs-12_5);
+  background: rgba(255, 196, 77, 0.14);
   color: var(--mid);
   border: 1px solid rgba(255, 196, 77, 0.4);
 }
 .game-card__update-btn:hover {
-  background: rgba(255, 196, 77, 0.25);
-  box-shadow: var(--glow-mid);
+  background: rgba(255, 196, 77, 0.24);
 }
 .all-games__update-host {
   margin-top: 2px;
@@ -252,10 +299,4 @@
   color: var(--text-faint);
   text-align: center;
   padding: 6px 10px;
-}
-.all-games__update-note--ok {
-  color: var(--success);
-}
-.all-games__update-note--err {
-  color: var(--danger);
 }

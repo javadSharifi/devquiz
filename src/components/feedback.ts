@@ -4,15 +4,16 @@
  * feedback for the user (no business state mutations).
  * ============================================================ */
 
-import { h } from './hyperscript.js';
+import { h, type Child } from './hyperscript.js';
+import { ico } from './icons.js';
 import { button } from './button.js';
 import { faNum } from '../types.js';
 
-export function emptyState(emoji: string, title: string, desc: string, action?: HTMLElement): HTMLElement {
+export function emptyState(art: Child, title: string, desc: string, action?: HTMLElement): HTMLElement {
   return h(
     'div',
     { className: 'empty' },
-    h('div', { className: 'empty__art', attrs: { 'aria-hidden': 'true' } }, emoji),
+    h('div', { className: 'empty__art', attrs: { 'aria-hidden': 'true' } }, art),
     h('h3', { className: 'empty__title' }, title),
     h('p', { className: 'empty__desc' }, desc),
     action ?? null,
@@ -23,7 +24,7 @@ export function errorCard(message: string, onRetry: () => void): HTMLElement {
   return h(
     'div',
     { className: 'error-card glass', attrs: { role: 'alert' } },
-    h('div', { className: 'error-card__icon', attrs: { 'aria-hidden': 'true' } }, '⚠️'),
+    h('div', { className: 'error-card__icon', attrs: { 'aria-hidden': 'true' } }, ico('alert', 34)),
     h('h3', {}, 'مشکلی پیش آمد'),
     h('p', { className: 'error-card__msg' }, message),
     button('تلاش دوباره', onRetry, { variant: 'primary', ariaLabel: 'تلاش دوباره' }),

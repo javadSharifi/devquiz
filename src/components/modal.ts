@@ -6,6 +6,7 @@
 
 import { h } from './hyperscript.js';
 import { button } from './button.js';
+import { ico } from './icons.js';
 
 export function confirmDialog(title: string, message: string, confirmLabel = 'تأیید'): Promise<boolean> {
   return new Promise((resolve) => {
@@ -20,7 +21,8 @@ export function confirmDialog(title: string, message: string, confirmLabel = 'ت
       },
       h(
         'div',
-        { className: 'modal glass' },
+        { className: 'modal' },
+        h('span', { className: 'modal__icon', attrs: { 'aria-hidden': 'true' } }, ico('alert', 24)),
         h('h3', { className: 'modal__title' }, title),
         h('p', { className: 'modal__msg' }, message),
         h(

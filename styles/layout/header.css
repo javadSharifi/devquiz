@@ -21,82 +21,65 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-weight: 700;
+  gap: 8px;
+  font-weight: 800;
   font-size: var(--fs-15);
-  letter-spacing: 0.2px;
 }
 .brand__logo {
-  filter: drop-shadow(0 0 6px rgba(124, 92, 255, 0.8));
-}
-.header-search-btn {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  margin-right: auto;
-  margin-left: 6px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  color: var(--text-dim);
-  font-size: var(--fs-14);
-  line-height: 1;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all var(--ease);
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: #fff;
 }
-.header-search-btn:hover {
-  color: var(--text);
-  border-color: var(--accent);
-  box-shadow: var(--glow-accent);
-}
-.header-search-btn:active {
-  transform: scale(0.94);
-}
+.header-search-btn,
 .header-fs-btn {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  margin-left: 8px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  border: none;
+  background: var(--seg-track);
   color: var(--text-dim);
-  font-size: var(--fs-16);
-  line-height: 1;
   cursor: pointer;
   font-family: inherit;
-  transition: all var(--ease);
+  transition: background var(--ease), color var(--ease);
 }
+.header-search-btn {
+  margin-right: auto;
+  margin-left: 6px;
+}
+.header-fs-btn {
+  margin-left: 8px;
+}
+.header-search-btn:hover,
 .header-fs-btn:hover {
   color: var(--text);
-  border-color: var(--accent);
-  box-shadow: var(--glow-accent);
+  background: rgba(124, 92, 255, 0.2);
 }
+.header-search-btn:active,
 .header-fs-btn:active {
   transform: scale(0.94);
 }
 
 .header-stats {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 .stat {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+  gap: 5px;
+  height: 32px;
+  padding: 0 11px;
   border-radius: var(--r-pill);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--seg-track);
   font-size: var(--fs-12_5);
-  font-weight: 700;
+  font-weight: 800;
   transition: box-shadow var(--ease);
-}
-.stat--streak .stat__icon {
-  filter: drop-shadow(0 0 5px rgba(255, 140, 60, 0.9));
 }
 .stat--xp {
   color: var(--accent-strong);

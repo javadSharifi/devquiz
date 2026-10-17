@@ -46,7 +46,7 @@ export function renderNav(shell: AppShell): void {
           attrs: { 'aria-label': label, 'aria-current': active ? 'page' : 'false' },
           onClick: () => store.dispatch({ type: 'SET_TAB', tab }),
         },
-        svgIcon(icon, 22),
+        h('span', { className: 'nav-item__icon' }, svgIcon(icon, 22)),
         h('span', { className: 'nav-item__label' }, label),
       );
     }),

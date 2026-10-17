@@ -22,7 +22,7 @@ describe('confirmDialog()', () => {
     const overlay = dom.body.childNodes[0] as FakeElement;
     expect(overlay.classList.contains('overlay--in')).toBe(true);
     const modal = overlay.childNodes[0] as FakeElement;
-    const actions = modal.childNodes[2] as FakeElement;
+    const actions = modal.childNodes[3] as FakeElement;
     const confirmBtn = actions.childNodes[1] as FakeElement;
     confirmBtn.dispatch('click', {});
     const result = await p;
@@ -34,7 +34,7 @@ describe('confirmDialog()', () => {
     dom.fireRaf();
     const overlay = dom.body.childNodes[0] as FakeElement;
     const modal = overlay.childNodes[0] as FakeElement;
-    const actions = modal.childNodes[2] as FakeElement;
+    const actions = modal.childNodes[3] as FakeElement;
     const cancelBtn = actions.childNodes[0] as FakeElement;
     cancelBtn.dispatch('click', {});
     const result = await p;
@@ -66,7 +66,7 @@ describe('confirmDialog()', () => {
     void confirmDialog('x', 'y');
     const overlay = dom.body.childNodes[0] as FakeElement;
     const modal = overlay.childNodes[0] as FakeElement;
-    const actions = modal.childNodes[2] as FakeElement;
+    const actions = modal.childNodes[3] as FakeElement;
     const confirmBtn = actions.childNodes[1] as FakeElement;
     expect((confirmBtn.childNodes[0] as any).textContent).toBe('تأیید');
   });
@@ -75,7 +75,7 @@ describe('confirmDialog()', () => {
     vi.useFakeTimers();
     const p = confirmDialog('x', 'y');
     const overlay = dom.body.childNodes[0] as FakeElement;
-    const confirmBtn = (overlay.childNodes[0] as FakeElement).childNodes[2].childNodes[1] as FakeElement;
+    const confirmBtn = (overlay.childNodes[0] as FakeElement).childNodes[3].childNodes[1] as FakeElement;
     confirmBtn.dispatch('click', {});
     vi.advanceTimersByTime(200);
     expect(dom.body.childNodes).toHaveLength(0);

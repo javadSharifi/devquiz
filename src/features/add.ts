@@ -5,12 +5,18 @@ import type { CustomQuestion } from '../types.js';
 import type { AppState } from '../state.js';
 import { addCustomQuestion, addCustomQuestionApi, triggerDebouncedCloudSync } from '../storage.js';
 import { button, h, toast } from '../ui.js';
+import { ico } from '../components/icons.js';
 
 const NEW_CATEGORY = '__new__';
 
 export function renderAdd(state: AppState): HTMLElement {
   const wrap = h('div', { className: 'view view--add' });
-  wrap.appendChild(h('h2', { className: 'view__title' }, 'سؤال جدید'));
+  wrap.appendChild(
+    h('header', { className: 'add-head' },
+      h('h2', { className: 'add-head__title' }, 'سؤال جدید'),
+      h('p', { className: 'add-head__sub' }, 'سؤال خودت را به یکی از موضوع‌ها اضافه کن'),
+    ),
+  );
 
   const topicIds = Object.keys(state.topics);
   const topicSelect = h('select', { className: 'field__input', id: 'add-topic' });
@@ -34,9 +40,9 @@ export function renderAdd(state: AppState): HTMLElement {
     categorySelect.replaceChildren();
     const merged = getMergedTopic(topicSelect.value);
     for (const c of merged?.categories ?? []) {
-      categorySelect.appendChild(h('option', { value: c.id }, `${c.icon} ${c.title}`));
+      categorySelect.appendChild(h('option', { value: c.id }, c.title));
     }
-    categorySelect.appendChild(h('option', { value: NEW_CATEGORY }, '➕ دسته جدید…'));
+    categorySelect.appendChild(h('option', { value: NEW_CATEGORY }, 'دسته جدید…'));
     newCatField.hidden = categorySelect.value !== NEW_CATEGORY;
   };
   fillCategories();
@@ -65,7 +71,7 @@ export function renderAdd(state: AppState): HTMLElement {
   const aError = h('p', { className: 'field__err' });
   const cError = h('p', { className: 'field__err' });
 
-  const submit = button('ذخیره سؤال', () => void save(), { variant: 'primary', className: 'btn--wide' });
+  const submit = button([ico('check', 16), 'ذخیره سؤال'], () => void save(), { variant: 'primary', className: 'add-submit' });
   submit.disabled = true;
 
   function validate(): boolean {
@@ -123,7 +129,7 @@ export function renderAdd(state: AppState): HTMLElement {
       newCatInput.value = '';
       validate();
       fillCategories();
-      toast(syncedWithServer ? 'سؤال ذخیره و در سرور همگام شد ✅' : 'سؤال ذخیره شد ✅', { kind: 'success' });
+      toast(syncedWithServer ? 'سؤال ذخیره و در سرور همگام شد' : 'سؤال ذخیره شد', { kind: 'success' });
       store.dispatch({ type: 'DATA_CHANGED' });
       triggerDebouncedCloudSync(false);
     } catch {
@@ -131,7 +137,8 @@ export function renderAdd(state: AppState): HTMLElement {
     }
   }
 
-  wrap.append(
+  const form = h('div', { className: 'add-form' });
+  form.append(
     fieldRow('موضوع', topicSelect, 'add-topic'),
     fieldRow('دسته‌بندی', categorySelect, 'add-category'),
     newCatField,
@@ -140,6 +147,9 @@ export function renderAdd(state: AppState): HTMLElement {
     qError,
     fieldRow('پاسخ', answerInput, 'add-answer'),
     aError,
+  );
+  wrap.append(
+    form,
     submit,
     h('p', { className: 'muted-note' }, 'سوال‌های خودت هیچ‌وقت با بروزرسانی موضوع‌ها پاک نمی‌شن.'),
   );

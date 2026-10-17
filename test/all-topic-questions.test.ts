@@ -84,7 +84,7 @@ describe('renderAllTopicQuestions', () => {
 
     const quickKnowBtn = headWrap.childNodes.find((c: any) => c.className?.includes('all-q__quick-know')) as FakeElement;
     expect(quickKnowBtn).toBeDefined();
-    expect(quickKnowBtn.textContent).toBe('✅ بلدم');
+    expect(quickKnowBtn.textContent).toBe('بلدم');
 
     const body = firstItem.childNodes.find((c: any) => c.className?.includes('cat-list__body')) as FakeElement;
     expect(body.hasAttribute('hidden')).toBe(true);
@@ -106,7 +106,7 @@ describe('renderAllTopicQuestions', () => {
     // Card should be marked as done
     expect(firstItem.classList.contains('cat-list__item--done')).toBe(true);
     expect(quickKnowBtn.classList.contains('all-q__quick-know--done')).toBe(true);
-    expect(quickKnowBtn.textContent).toBe('✔ بلدم');
+    expect(quickKnowBtn.textContent).toBe('بلدم');
   });
 
   it('renders quick-know button with done state if question is already known', () => {
@@ -127,7 +127,7 @@ describe('renderAllTopicQuestions', () => {
     const headWrap = firstItem.childNodes.find((c: any) => c.className?.includes('all-q__head-wrap')) as FakeElement;
     const quickKnowBtn = headWrap.childNodes.find((c: any) => c.className?.includes('all-q__quick-know')) as FakeElement;
     expect(quickKnowBtn.className).toContain('all-q__quick-know--done');
-    expect(quickKnowBtn.textContent).toBe('✔ بلدم');
+    expect(quickKnowBtn.textContent).toBe('بلدم');
   });
 
   it('collapses card and calls scrollIntoView when answering via inline action buttons', () => {

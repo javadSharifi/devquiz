@@ -48,3 +48,48 @@
 .field__err:empty {
   display: none;
 }
+
+.view--add {
+  gap: 16px;
+}
+.add-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.add-head__title {
+  margin: 0;
+  font-size: var(--fs-26);
+  font-weight: 800;
+}
+.add-head__sub {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-13);
+}
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+.add-form .field__input {
+  min-height: 46px;
+  background: var(--bg);
+}
+.add-form .field__input--area {
+  min-height: 96px;
+}
+.add-form .field__input--tall {
+  min-height: 150px;
+}
+.add-submit {
+  width: 100%;
+  min-height: 50px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-14);
+  font-weight: 800;
+}

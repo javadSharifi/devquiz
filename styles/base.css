@@ -118,3 +118,75 @@ button {
   border-color: var(--border);
 }
 
+
+/* ------------------------------------------------------------
+ * Icons (replace emoji): inline SVGs inherit text color.
+ * ------------------------------------------------------------ */
+.ico {
+  flex: 0 0 auto;
+}
+.empty__art,
+.error-card__icon,
+.celebrate__badge,
+.level-pick__emoji,
+.cat-card__icon,
+.all-questions-entry-btn__icon,
+.stat__icon,
+.stat-chip__icon,
+.brand__logo,
+.ob-finish__emoji,
+.all-games__search-icon,
+.face__foot,
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.empty__art {
+  display: grid;
+  color: var(--accent-strong);
+}
+.error-card__icon {
+  color: var(--danger);
+}
+.celebrate__badge {
+  color: var(--mid);
+}
+.level-pick__card--junior .level-pick__emoji {
+  color: var(--junior);
+}
+.level-pick__card--mid .level-pick__emoji {
+  color: var(--mid);
+}
+.level-pick__card--senior .level-pick__emoji {
+  color: var(--senior);
+}
+.cat-card__icon,
+.all-questions-entry-btn__icon {
+  color: var(--accent-strong);
+}
+.stat--streak .stat__icon {
+  color: #ff8c3c;
+}
+.stat--xp .stat__icon,
+.brand__logo {
+  color: var(--accent-strong);
+}
+.stat-chip__icon {
+  color: var(--accent-strong);
+}
+.ob-finish__emoji {
+  color: var(--mid);
+}
+.all-games__search-icon {
+  color: var(--text-dim);
+}
+.topic-tile__icon {
+  display: inline-grid;
+  place-items: center;
+  color: var(--accent-strong);
+}
+.ob-card__icon:not(.ob-card__icon--img) {
+  color: var(--accent-strong);
+}

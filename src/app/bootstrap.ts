@@ -112,7 +112,7 @@ export async function bootstrap(shell: AppShell): Promise<void> {
         },
       });
       if (session.selectedCategoryId) {
-        toast('ادامه از جایی که بودی 👋', { duration: 2200, kind: 'info' });
+        toast('ادامه از جایی که بودی', { duration: 2200, kind: 'info' });
       }
     }
   } catch {

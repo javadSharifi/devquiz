@@ -3,28 +3,42 @@ import type { AppState } from '../../state.js';
 import { store } from '../../state.js';
 import type { FontSize, Theme } from '../../types.js';
 import { segmentedGroup } from './segmented.js';
+import { ICON, icon, settingsSection } from './section.js';
 
-export const FONT_LABELS: Record<FontSize, string> = { small: 'sm', medium: 'md', large: 'lg', extra: 'xl' };
+export const FONT_LABELS: Record<FontSize, string> = { small: 'آ', medium: 'آ', large: 'آ', extra: 'آ' };
 export const FONT_SIZES: FontSize[] = ['small', 'medium', 'large', 'extra'];
-export const THEME_LABELS: Record<Theme, string> = { dark: '🌙 تیره', light: '☀️ روشن' };
+export const THEME_LABELS: Record<Theme, string> = { dark: 'تیره', light: 'روشن' };
 export const THEMES: Theme[] = ['dark', 'light'];
 
-export function renderDisplaySection(state: AppState): DocumentFragment {
-  const frag = document.createDocumentFragment();
-  frag.appendChild(h('h3', { className: 'section-title' }, 'نمایش'));
-  const themeGroup = h('div', { className: 'settings-group glass' });
-  themeGroup.appendChild(
-    segmentedGroup(THEMES, THEME_LABELS, state.theme, (v) => {
-      store.dispatch({ type: 'SET_THEME', theme: v });
-    }, 'تم'),
-  );
-  const fontRow = h('div', { className: 'settings-row settings-row--static', attrs: { 'aria-label': 'اندازه فونت' } },
-    h('span', { className: 'settings-row__label' }, 'اندازه فونت'),
+const THEME_ICONS: Record<Theme, string> = { dark: ICON.moon, light: ICON.sun };
+
+export function renderDisplaySection(state: AppState): HTMLElement {
+  const tiles = h('div', { className: 'theme-tiles', attrs: { role: 'radiogroup', 'aria-label': 'تم' } });
+  for (const t of THEMES) {
+    const active = t === state.theme;
+    tiles.appendChild(
+      h(
+        'button',
+        {
+          type: 'button',
+          className: `theme-tile theme-tile--${t}${active ? ' theme-tile--active' : ''}`,
+          attrs: { role: 'radio', 'aria-checked': String(active) },
+          onClick: () => store.dispatch({ type: 'SET_THEME', theme: t }),
+        },
+        h('span', { className: 'theme-tile__swatch' }, icon(THEME_ICONS[t], 20)),
+        h('span', { className: 'theme-tile__label' }, THEME_LABELS[t]),
+      ),
+    );
+  }
+
+  const fontBlock = h(
+    'div',
+    { className: 'st-field' },
+    h('span', { className: 'st-field__label' }, 'اندازه متن'),
     segmentedGroup(FONT_SIZES, FONT_LABELS, state.fontSize, (v) => {
       store.dispatch({ type: 'SET_FONT_SIZE', fontSize: v });
-    }, 'اندازه فونت'),
+    }, 'اندازه متن'),
   );
-  themeGroup.appendChild(fontRow);
-  frag.appendChild(themeGroup);
-  return frag;
+
+  return settingsSection('ظاهر', h('div', { className: 'st-card st-card--pad' }, tiles, fontBlock));
 }

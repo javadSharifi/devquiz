@@ -9,6 +9,7 @@ import { stateKey } from '../types.js';
 import { faNum } from '../types.js';
 import { renderMarkdown } from '../markdown.js';
 import { button, emptyState, h, toast } from '../ui.js';
+import { ico } from '../components/icons.js';
 
 const randomSeen = new Set<string>();
 
@@ -52,7 +53,7 @@ export function renderReview(state: AppState): HTMLElement {
   const topicIds = Object.keys(state.topics);
 
   if (topicIds.length === 0) {
-    return emptyState('📭', 'موضوعی یافت نشد', 'ابتدا از صفحه همه بازی‌ها یک بازی دانلود یا انتخاب کنید.');
+    return emptyState(ico('inbox', 42), 'موضوعی یافت نشد', 'ابتدا از صفحه همه بازی‌ها یک بازی دانلود یا انتخاب کنید.');
   }
 
   if (state.randomQuestionId !== null) {
@@ -66,7 +67,7 @@ export function renderReview(state: AppState): HTMLElement {
             clearRandomSeen();
             store.dispatch({ type: 'SET_RANDOM_QUESTION', questionId: null });
           }),
-          h('h2', { className: 'view__title view__title--sm' }, '🎲 سؤال تصادفی'),
+          h('h2', { className: 'view__title view__title--sm' }, [ico('dice', 18), ' سؤال تصادفی']),
         ),
       );
       const card = buildFlashcard(q, state.isFlipped, (newState, btn) => {
@@ -87,7 +88,7 @@ export function renderReview(state: AppState): HTMLElement {
       'div',
       { className: 'view-head' },
       backButton(() => store.dispatch({ type: 'SET_TAB', tab: 'all-games' })),
-      h('h2', { className: 'view__title' }, 'مرور'),
+      h('h2', { className: 'view__title rv-title' }, 'مرور'),
     ),
   );
 
@@ -118,7 +119,7 @@ export function renderReview(state: AppState): HTMLElement {
 
   if (allLearningItems.length === 0) {
     wrap.appendChild(
-      emptyState('🌱', 'لیست یادگیری خالیه', 'وقتی روی کارتی «یاد می‌گیرم» بزنی، اینجا برای مرور ظاهر می‌شه.'),
+      emptyState(ico('sprout', 42), 'لیست یادگیری خالیه', 'وقتی روی کارتی «یاد می‌گیرم» بزنی، اینجا برای مرور ظاهر می‌شه.'),
     );
     return wrap;
   }
@@ -134,15 +135,29 @@ export function renderReview(state: AppState): HTMLElement {
     ? (state.topics[selectedReviewTopic]?.meta?.title || selectedReviewTopic)
     : '';
 
-  const randomBtnLabel = isFilteredTopic
-    ? `🎲 سؤال تصادفی (${filteredTopicTitle})`
-    : '🎲 سؤال تصادفی';
-
+  const poolCount = isFilteredTopic ? (topicCounts[selectedReviewTopic] ?? 0) : allLearningItems.length;
   wrap.appendChild(
-    button(
-      randomBtnLabel,
-      () => pickRandomQuestion(selectedReviewTopic),
-      { variant: 'primary', className: 'btn--wide' },
+    h(
+      'button',
+      {
+        className: 'rv-random',
+        type: 'button',
+        onClick: () => pickRandomQuestion(selectedReviewTopic),
+      },
+      h('span', { className: 'rv-random__icon', attrs: { 'aria-hidden': 'true' } }, ico('dice', 24)),
+      h(
+        'span',
+        { className: 'rv-random__text' },
+        h('span', { className: 'rv-random__title' }, 'سؤال تصادفی'),
+        h(
+          'span',
+          { className: 'rv-random__sub' },
+          isFilteredTopic
+            ? `از «${filteredTopicTitle}» · ${faNum(poolCount)} سؤال در لیست`
+            : `از همهٔ موضوع‌ها · ${faNum(poolCount)} سؤال در لیست`,
+        ),
+      ),
+      h('span', { className: 'rv-random__go', attrs: { 'aria-hidden': 'true' } }, ico('play', 16)),
     ),
   );
 
@@ -212,8 +227,8 @@ export function renderReview(state: AppState): HTMLElement {
     : allLearningItems.filter((item) => item.topicId === selectedReviewTopic);
 
   const sectionTitle = isFilteredTopic
-    ? `📚 لیست یادگیری: ${filteredTopicTitle} (${faNum(filteredItems.length)})`
-    : `📚 لیست یادگیری (${faNum(filteredItems.length)})`;
+    ? `لیست یادگیری: ${filteredTopicTitle} (${faNum(filteredItems.length)})`
+    : `لیست یادگیری (${faNum(filteredItems.length)})`;
 
   wrap.appendChild(h('h3', { className: 'section-title' }, sectionTitle));
 
@@ -227,7 +242,7 @@ export function renderReview(state: AppState): HTMLElement {
       { variant: 'soft', className: 'btn--sm' },
     );
     wrap.appendChild(
-      emptyState('🔍', 'سؤالی با این فیلتر یافت نشد', 'می‌توانی فیلترها را تغییر دهی یا پاک کنی.', clearBtn),
+      emptyState(ico('search', 42), 'سؤالی با این فیلتر یافت نشد', 'می‌توانی فیلترها را تغییر دهی یا پاک کنی.', clearBtn),
     );
     return wrap;
   }
@@ -241,6 +256,20 @@ export function renderReview(state: AppState): HTMLElement {
   return wrap;
 }
 
+/** Re-render after a state change without losing the user's place in the list. */
+function dispatchKeepingScroll(fn: () => void): void {
+  const main = document.getElementById('app-main');
+  const top = main?.scrollTop ?? 0;
+  fn();
+  store.dispatch({ type: 'DATA_CHANGED' });
+  if (main) {
+    main.scrollTop = top;
+    requestAnimationFrame(() => {
+      main.scrollTop = top;
+    });
+  }
+}
+
 function reviewItem(
   state: AppState,
   q: Question,
@@ -249,6 +278,21 @@ function reviewItem(
   topicTitle: string,
   showTopicBadge: boolean,
 ): HTMLElement {
+  const key = stateKey(topicId, q.id);
+  const current: QuestionState = state.userStates[key]?.state ?? 'unseen';
+  const isSkipped = current === 'skip';
+
+  const setState = (value: QuestionState | null, msg: string): void => {
+    dispatchKeepingScroll(() => {
+      store.dispatch({
+        type: 'SET_USER_STATE',
+        key,
+        value: value === null ? null : { state: value, updatedAt: Date.now() },
+      });
+    });
+    toast(msg, { kind: 'success', duration: 2500 });
+  };
+
   const body = h('div', { className: 'review-item__body', attrs: { hidden: '' } });
   let rendered = false;
   const toggle = h(
@@ -258,36 +302,65 @@ function reviewItem(
       type: 'button',
       attrs: { 'aria-expanded': 'false', 'aria-label': `نمایش پاسخ: ${q.question.slice(0, 60)}` },
       onClick: () => {
-        const hidden = body.hasAttribute('hidden');
-        if (hidden && !rendered) {
+        const opening = body.hasAttribute('hidden');
+        if (opening && !rendered) {
           body.appendChild(renderMarkdown(q.answer));
           body.appendChild(
-            button(
-              '✅ بلدم شد',
-              () => {
-                const key = stateKey(topicId, q.id);
-                store.dispatch({ type: 'SET_USER_STATE', key, value: { state: 'know', updatedAt: Date.now() } });
-                toast('به «بلدم» منتقل شد ✅', { kind: 'success', duration: 2500 });
-                store.dispatch({ type: 'DATA_CHANGED' });
-              },
-              { variant: 'soft', className: 'act act--know' },
+            h(
+              'div',
+              { className: 'review-item__actions' },
+              button([ico('checkCircle', 16), 'بلدم شد'], () => setState('know', 'به «بلدم» منتقل شد'), {
+                variant: 'soft',
+                className: 'act act--know',
+              }),
+              button([ico('trash', 16), 'حذف از مرور'], () => setState(null, 'از لیست مرور حذف شد'), {
+                variant: 'soft',
+                className: 'act act--remove',
+              }),
+              button(
+                isSkipped ? [ico('book', 16), 'یاد می‌گیرم'] : [ico('skip', 16), 'رد کن'],
+                () => setState(isSkipped ? 'want_to_learn' : 'skip', isSkipped ? 'به «یاد می‌گیرم» برگشت' : 'به «رد شده» منتقل شد'),
+                { variant: 'soft', className: `act ${isSkipped ? 'act--learn' : 'act--skip'}` },
+              ),
+              button(
+                [ico('play', 14), 'تمرین این موضوع'],
+                () => {
+                  store.dispatch({ type: 'SET_ACTIVE_TOPIC', topicId });
+                  store.dispatch({ type: 'SET_TAB', tab: 'game' });
+                },
+                { variant: 'ghost', className: 'act act--goto' },
+              ),
             ),
           );
           rendered = true;
         }
-        if (hidden) body.removeAttribute('hidden');
-        else body.setAttribute('hidden', '');
-        toggle.setAttribute('aria-expanded', String(hidden));
-        item.classList.toggle('review-item--open', hidden);
+        if (opening) {
+          body.removeAttribute('hidden');
+        } else {
+          body.setAttribute('hidden', '');
+          // keep the question in view once the answer collapses
+          item.scrollIntoView?.({ block: 'nearest' });
+        }
+        toggle.setAttribute('aria-expanded', String(opening));
+        item.classList.toggle('review-item--open', opening);
       },
     },
-    h('span', { className: 'review-item__cat', attrs: { 'aria-hidden': 'true' } }, cat.icon),
-    h('span', { className: 'review-item__q' }, q.question),
-    ...(showTopicBadge ? [h('span', { className: 'review-item__topic-badge' }, topicTitle)] : []),
-    renderPriorityBadge(q.priority, { compact: true }),
+    h('span', { className: 'review-item__cat', attrs: { 'aria-hidden': 'true' } }, ico('folder', 18)),
+    h(
+      'span',
+      { className: 'review-item__main' },
+      h('span', { className: 'review-item__q' }, q.question),
+      h(
+        'span',
+        { className: 'review-item__meta' },
+        ...(showTopicBadge ? [h('span', { className: 'review-item__topic-badge' }, topicTitle)] : []),
+        h('span', { className: `review-item__state review-item__state--${current}` }, isSkipped ? 'رد شده' : 'یاد می‌گیرم'),
+        renderPriorityBadge(q.priority, { compact: true }),
+      ),
+    ),
     h('span', { className: 'review-item__chev', attrs: { 'aria-hidden': 'true' } }, '‹'),
   );
-  const item = h('div', { className: 'review-item glass' }, toggle, body);
+  const item = h('div', { className: `review-item review-item--${current}` }, toggle, body);
   return item;
 }
 
@@ -329,7 +402,7 @@ export function pickRandomQuestion(topicFilter?: string): void {
       const targetTitle = (topicFilter && topicFilter !== 'all')
         ? (state.topics[topicFilter]?.meta?.title || topicFilter)
         : null;
-      const msg = targetTitle ? `همه سؤال‌های ${targetTitle} رو بلدی 🎉` : 'همه سؤال‌ها رو بلدی 🎉';
+      const msg = targetTitle ? `همه سؤال‌های ${targetTitle} رو بلدی` : 'همه سؤال‌ها رو بلدی';
       toast(msg, { kind: 'success' });
       store.dispatch({ type: 'SET_RANDOM_QUESTION', questionId: null });
       return;

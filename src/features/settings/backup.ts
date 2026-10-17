@@ -1,9 +1,9 @@
 import { h } from '../../components/hyperscript.js';
-import { button } from '../../components/button.js';
 import { toast } from '../../components/toast.js';
 import { store } from '../../state.js';
 import { getCustomQuestions, importCustomQuestions, setLocal } from '../../storage.js';
 import { faNum, isQuestionState } from '../../types.js';
+import { ICON, icon, settingsSection } from './section.js';
 import type { Gamification, QuestionState } from '../../types.js';
 
 type ImportedUserStates = Record<string, { state: QuestionState; updatedAt: number }>;
@@ -92,9 +92,7 @@ export async function importBackupFromFile(file: File): Promise<void> {
   store.dispatch({ type: 'DATA_CHANGED' });
 }
 
-export function renderBackupSection(): DocumentFragment {
-  const frag = document.createDocumentFragment();
-  frag.appendChild(h('h3', { className: 'section-title' }, 'سوال‌های من'));
+export function renderBackupSection(): HTMLElement {
   const fileInput = h('input', { type: 'file', className: 'sr-only', id: 'import-file' });
   fileInput.setAttribute('accept', 'application/json,.json');
   fileInput.addEventListener('change', () => {
@@ -110,14 +108,22 @@ export function renderBackupSection(): DocumentFragment {
       }
     })();
   });
-  frag.appendChild(
+  const tile = (path: string, tone: string, title: string, sub: string, onClick: () => void): HTMLElement =>
+    h(
+      'button',
+      { type: 'button', className: 'data-tile', onClick },
+      h('span', { className: `data-tile__icon data-tile__icon--${tone}` }, icon(path, 18)),
+      h('span', { className: 'data-tile__title' }, title),
+      h('span', { className: 'data-tile__sub' }, sub),
+    );
+  return settingsSection(
+    'داده‌ها',
     h(
       'div',
-      { className: 'settings-actions' },
-      button('📤 خروجی سوال‌های من', () => exportCustomQuestions(), { variant: 'ghost' }),
-      button('📥 ورودی', () => fileInput.click(), { variant: 'ghost' }),
+      { className: 'data-tiles' },
+      tile(ICON.download, 'teal', 'خروجی پشتیبان', 'ذخیره سؤال‌ها و پیشرفت', () => exportCustomQuestions()),
+      tile(ICON.upload, 'accent', 'ورودی پشتیبان', 'بازیابی از فایل JSON', () => fileInput.click()),
       fileInput,
     ),
   );
-  return frag;
 }

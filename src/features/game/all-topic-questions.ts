@@ -17,6 +17,7 @@ import type { Category, Question, QuestionLevel, QuestionState, Topic } from '..
 import { backButton, LEVEL_LABEL, renderPriorityBadge } from '../../lib/helpers.js';
 import { button, emptyState, h, progressBar, toast } from '../../ui.js';
 import { STATE_COLORS } from '../../lib/cat-list-stats.js';
+import { ico } from '../../components/icons.js';
 
 interface TopicQuestionItem {
   question: Question;
@@ -60,7 +61,7 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
       h(
         'div',
         { className: 'view-head__titles' },
-        h('h2', { className: 'view__title view__title--sm' }, `📋 همه سؤال‌های ${topic.meta.title}`),
+        h('h2', { className: 'view__title view__title--sm' }, `همه سؤال‌های ${topic.meta.title}`),
         h(
           'p',
           { className: 'view__sub view__sub--sm' },
@@ -72,7 +73,10 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
 
   // Overall Progress Bar
   const bar = progressBar(knownCount, allItems.length);
-  wrap.appendChild(bar);
+  const overallPct = allItems.length > 0 ? Math.round((knownCount / allItems.length) * 100) : 0;
+  wrap.appendChild(
+    h('div', { className: 'cl-summary' }, h('p', { className: 'cat-list__count' }, `${faNum(overallPct)}٪ تکمیل`), bar),
+  );
 
   // Action buttons
   const unlearnedIds = allItems
@@ -90,15 +94,15 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
       { className: 'all-questions__actions' },
       unlearnedIds.length > 0
         ? button(
-            `▶ تمرین کارتی (${faNum(unlearnedIds.length)} سؤال بلدنشده)`,
+            [ico('play', 14), `تمرین کارتی (${faNum(unlearnedIds.length)} سؤال بلدنشده)`],
             () => store.dispatch({ type: 'SET_QUEUE', queue: unlearnedIds, index: 0 }),
-            { variant: 'primary', className: 'btn--wide btn--big' },
+            { variant: 'primary', className: 'cl-actions__main' },
           )
-        : h('p', { className: 'cat-list__all-done' }, '✅ تمام سوالات این موضوع را بلدید!'),
+        : h('p', { className: 'cat-list__all-done' }, [ico('checkCircle', 16), ' تمام سوالات این موضوع را بلدید!']),
       button(
-        `مرور تمام ${faNum(allItems.length)} سؤال در فلش‌کارت`,
+        [ico('flip', 14), `مرور همه ${faNum(allItems.length)} سؤال`],
         () => store.dispatch({ type: 'SET_QUEUE', queue: allSortedIds, index: 0 }),
-        { variant: 'ghost', className: 'btn--wide' },
+        { variant: 'ghost', className: 'cl-actions__side' },
       ),
     ),
   );
@@ -174,7 +178,7 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
 
     if (filtered.length === 0) {
       listContainer.appendChild(
-        emptyState('🔍', 'سؤالی یافت نشد', 'با تغییر فیلتر یا عبارت جستجو دوباره امتحان کن.'),
+        emptyState(ico('search', 42), 'سؤالی یافت نشد', 'با تغییر فیلتر یا عبارت جستجو دوباره امتحان کن.'),
       );
       return;
     }
@@ -182,7 +186,7 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
     const countHeader = h(
       'div',
       { className: 'all-questions__count-info' },
-      h('span', {}, `نمایش ${faNum(filtered.length)} سؤال (مرتب‌شده از بیشترین درصد اهمیت):`),
+      h('span', {}, `${faNum(filtered.length)} سؤال · مرتب‌شده بر اساس اهمیت`),
     );
     listContainer.appendChild(countHeader);
 
@@ -212,17 +216,17 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
                 h(
                   'div',
                   { className: 'cat-list__actions-inline' },
-                  button('✅ بلدم', () => updateState('know'), {
+                  button([ico('checkCircle', 16), 'بلدم'], () => updateState('know'), {
                     variant: 'soft',
                     className: 'act act--know',
                     ariaLabel: 'بلدم',
                   }),
-                  button('📚 یاد می‌گیرم', () => updateState('want_to_learn'), {
+                  button([ico('book', 16), 'یاد می‌گیرم'], () => updateState('want_to_learn'), {
                     variant: 'soft',
                     className: 'act act--learn',
                     ariaLabel: 'یاد می‌گیرم',
                   }),
-                  button('⏭ رد کن', () => updateState('skip'), {
+                  button([ico('skip', 16), 'رد کن'], () => updateState('skip'), {
                     variant: 'soft',
                     className: 'act act--skip',
                     ariaLabel: 'رد کن',
@@ -241,7 +245,7 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
         h(
           'div',
           { className: 'all-q__meta-row' },
-          h('span', { className: 'all-q__cat-tag' }, `${cat.icon} ${cat.title}`),
+          h('span', { className: 'all-q__cat-tag' }, cat.title),
           h('span', { className: `all-q__lvl-tag all-q__lvl-tag--${cat.level}` }, LEVEL_LABEL[cat.level] ?? cat.level),
           priorityBadge ?? h('span', { className: 'priority-badge priority-badge--low' }, 'بدون اولویت'),
         ),
@@ -249,7 +253,7 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
       );
 
       const quickKnowBtn = button(
-        isDone ? '✔ بلدم' : '✅ بلدم',
+        [ico(isDone ? 'check' : 'checkCircle', 16), 'بلدم'],
         (e: MouseEvent) => {
           e?.stopPropagation?.();
           updateState('know');
@@ -273,7 +277,7 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
         'div',
         {
           className: `cat-list__item all-q__item${isDone ? ' cat-list__item--done' : ''}`,
-          style: { borderInlineStart: `3px solid ${color}` },
+          style: { borderInlineStartColor: color },
         },
         headWrap,
         body,
@@ -283,11 +287,11 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
         currentState = newState;
         isDone = newState === 'know';
         color = STATE_COLORS[newState] ?? 'var(--danger)';
-        cardWrap.style.borderInlineStart = `3px solid ${color}`;
+        cardWrap.style.borderInlineStartColor = color;
         cardWrap.classList.toggle('cat-list__item--done', isDone);
         toggle.classList.toggle('cat-list__head--done', isDone);
         quickKnowBtn.classList.toggle('all-q__quick-know--done', isDone);
-        quickKnowBtn.textContent = isDone ? '✔ بلدم' : '✅ بلدم';
+        quickKnowBtn.replaceChildren(ico(isDone ? 'check' : 'checkCircle', 16), document.createTextNode('بلدم'));
         quickKnowBtn.setAttribute('title', isDone ? 'این سؤال در لیست بلدم قرار دارد' : 'ثبت سریع به عنوان بلدم');
 
         // Collapse card after choosing an answer
@@ -303,10 +307,10 @@ export function renderAllTopicQuestions(state: AppState, topic: Topic): HTMLElem
         });
         toast(
           newState === 'know'
-            ? 'به بلدم منتقل شد ✅'
+            ? 'به بلدم منتقل شد'
             : newState === 'want_to_learn'
-              ? 'به لیست یادگیری اضافه شد 📚'
-              : 'رد شد ⏭',
+              ? 'به لیست یادگیری اضافه شد'
+              : 'رد شد',
           { kind: 'success', duration: 1500 },
         );
       }

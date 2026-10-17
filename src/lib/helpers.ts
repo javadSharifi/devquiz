@@ -1,4 +1,5 @@
 import { h, svgIcon } from '../ui.js';
+import { ico, type IconName } from '../components/icons.js';
 import type { QuestionLevel } from '../types.js';
 import { faNum, getPriorityLevel, getPriorityPercent } from '../types.js';
 
@@ -8,39 +9,22 @@ export const LEVEL_LABEL: Record<QuestionLevel, string> = {
   senior: 'سنیور',
 };
 
-export const ICON_FALLBACK: Record<string, string> = {
-  javascript: '🟨',
-  typescript: '🟦',
-  react: '⚛️',
-  vue: '🟢',
-  node: '🟩',
-  python: '🐍',
-  go: '🔵',
-  rust: '🦀',
-  java: '☕',
-  css: '🎨',
-  html: '🌐',
-  sql: '🗄️',
-  docker: '🐳',
-  git: '🔧',
-};
-
 const ICON_URL_RE = /^(https?:|data:|\/\/)/i;
 
+/** Image URL from catalog data, or '' when the topic has no usable image icon. */
 export function pickIcon(item: { id: string; icon?: string }): string {
-  if (item.icon && item.icon.length > 0) return item.icon;
-  return ICON_FALLBACK[item.id] ?? '📘';
+  return item.icon && ICON_URL_RE.test(item.icon) ? item.icon : '';
 }
 
 export function topicIconEl(item: { id: string; icon?: string }): HTMLElement {
   const value = pickIcon(item);
-  if (ICON_URL_RE.test(value)) {
+  if (value) {
     return h('img', {
       className: 'topic-tile__icon topic-tile__icon--img',
       attrs: { src: value, alt: '', 'aria-hidden': 'true', loading: 'lazy', decoding: 'async' },
     });
   }
-  return h('span', { className: 'topic-tile__icon', attrs: { 'aria-hidden': 'true' } }, value);
+  return h('span', { className: 'topic-tile__icon', attrs: { 'aria-hidden': 'true' } }, ico('code', 24));
 }
 
 export function backButton(onClick: () => void): HTMLElement {
@@ -60,11 +44,11 @@ export function fieldRow(label: string, input: HTMLElement, forId: string): HTML
   );
 }
 
-export function statChip(icon: string, label: string, value: string): HTMLElement {
+export function statChip(icon: IconName, label: string, value: string): HTMLElement {
   return h(
     'div',
     { className: 'stat-chip' },
-    h('span', { className: 'stat-chip__icon', attrs: { 'aria-hidden': 'true' } }, icon),
+    h('span', { className: 'stat-chip__icon', attrs: { 'aria-hidden': 'true' } }, ico(icon, 20)),
     h('span', { className: 'stat-chip__value' }, value),
     h('span', { className: 'stat-chip__label' }, label),
   );
@@ -77,7 +61,7 @@ export function renderPriorityBadge(
   const pct = getPriorityPercent(priority);
   if (pct === null) return null;
   const level = getPriorityLevel(pct);
-  const text = opts?.compact ? `${faNum(pct)}٪` : `🎯 ${faNum(pct)}٪ اهمیت`;
+  const text = opts?.compact ? `${faNum(pct)}٪` : `${faNum(pct)}٪ اهمیت`;
   return h(
     'span',
     {
@@ -85,6 +69,7 @@ export function renderPriorityBadge(
       title: `درصد اهمیت: ${faNum(pct)}٪`,
       attrs: { 'aria-label': `درصد اهمیت: ${faNum(pct)}٪` },
     },
+    opts?.compact ? null : ico('target', 12),
     text,
   );
 }

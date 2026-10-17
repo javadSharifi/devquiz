@@ -62,7 +62,7 @@ async function checkForUpdates(): Promise<void> {
     const hasUpdate = detectUpdates(versions, catalog.topics);
     if (hasUpdate) {
       await platform.action.setBadgeBackgroundColor({ color: '#7c5cff' });
-      await platform.action.setBadgeText({ text: '🔔' });
+      await platform.action.setBadgeText({ text: '●' });
     } else {
       await platform.action.setBadgeText({ text: '' });
     }

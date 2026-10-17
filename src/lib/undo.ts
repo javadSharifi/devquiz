@@ -40,7 +40,7 @@ function storeLastUndo(record: UndoRecord): void {
 
 function showUndoToast(newState: QuestionState): void {
   const label =
-    newState === 'know' ? 'ثبت شد: بلدم ✅' : newState === 'want_to_learn' ? 'ثبت شد: یاد می‌گیرم 📚' : 'رد شد ⏭';
+    newState === 'know' ? 'ثبت شد: بلدم' : newState === 'want_to_learn' ? 'ثبت شد: یاد می‌گیرم' : 'رد شد';
   toast(label, {
     actionLabel: 'برگردون',
     duration: 4000,

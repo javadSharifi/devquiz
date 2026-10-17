@@ -3,9 +3,6 @@
  * Full-screen overlay + confirmDialog modal surface.
  * ============================================================ */
 
-/* ------------------------------------------------------------
- * Overlay / modal
- * ------------------------------------------------------------ */
 .overlay {
   position: fixed;
   inset: 0;
@@ -22,22 +19,51 @@
   opacity: 1;
 }
 .modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  max-width: 320px;
-  padding: 18px;
+  max-width: 340px;
+  padding: 22px 18px 18px;
+  text-align: center;
   background: var(--modal-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-2);
+  transform: scale(0.96);
+  transition: transform 0.18s ease;
+}
+.overlay--in .modal {
+  transform: scale(1);
+}
+.modal__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: rgba(255, 93, 122, 0.14);
+  color: var(--danger);
 }
 .modal__title {
   margin: 0 0 6px;
-  font-size: var(--fs-15);
+  font-size: var(--fs-17);
+  font-weight: 800;
 }
 .modal__msg {
-  margin: 0 0 14px;
+  margin: 0 0 18px;
   color: var(--text-dim);
   font-size: var(--fs-13);
+  line-height: 1.8;
 }
 .modal__actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  justify-content: flex-start;
+  width: 100%;
+}
+.modal__actions .btn {
+  min-height: 46px;
+  border-radius: var(--r-md);
 }

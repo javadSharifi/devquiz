@@ -9,6 +9,10 @@
  * Buttons
  * ------------------------------------------------------------ */
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-family: inherit;
   font-weight: 700;
   border: none;

@@ -3,6 +3,7 @@ import { store } from '../state.js';
 import type { Question, QuestionState } from '../types.js';
 import { button, h } from '../ui.js';
 import { renderPriorityBadge } from '../lib/helpers.js';
+import { ico } from './icons.js';
 
 export function buildFlashcard(
   question: Question,
@@ -15,24 +16,24 @@ export function buildFlashcard(
   const front = h(
     'div',
     { className: 'flashcard__face flashcard__face--front' },
-    priorityBadgeFront ? h('div', { className: 'face__header' }, priorityBadgeFront) : null,
+    h('div', { className: 'face__header' }, h('div', { className: 'face__badge' }, 'سؤال'), priorityBadgeFront),
     h('div', { className: 'face__body' }, renderMarkdown(question.question)),
-    h('div', { className: 'face__foot', attrs: { 'aria-hidden': 'true' } }, '👆 پاسخ'),
+    h('div', { className: 'face__foot', attrs: { 'aria-hidden': 'true' } }, [ico('flip', 14), ' ضربه بزن تا پاسخ را ببینی']),
   );
   const actions = h(
     'div',
     { className: 'face__actions' },
-    button('✅ بلدم', (ev) => onAnswer('know', ev.currentTarget as HTMLElement), {
+    button([ico('checkCircle', 16), 'بلدم'], (ev) => onAnswer('know', ev.currentTarget as HTMLElement), {
       variant: 'soft',
       className: 'act act--know',
       ariaLabel: 'بلدم (فلش چپ)',
     }),
-    button('📚 یاد می‌گیرم', (ev) => onAnswer('want_to_learn', ev.currentTarget as HTMLElement), {
+    button([ico('book', 16), 'یاد می‌گیرم'], (ev) => onAnswer('want_to_learn', ev.currentTarget as HTMLElement), {
       variant: 'soft',
       className: 'act act--learn',
       ariaLabel: 'یاد می‌گیرم (فلش پایین)',
     }),
-    button('⏭ رد کن', (ev) => onAnswer('skip', ev.currentTarget as HTMLElement), {
+    button([ico('skip', 16), 'رد کن'], (ev) => onAnswer('skip', ev.currentTarget as HTMLElement), {
       variant: 'soft',
       className: 'act act--skip',
       ariaLabel: 'رد کن (فلش راست)',

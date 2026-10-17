@@ -46,23 +46,35 @@
   border: none;
   cursor: pointer;
   color: var(--text-faint);
-  opacity: 0.75;
   font-family: inherit;
-  transition: all var(--ease);
+  transition: color var(--ease);
   padding: 4px 2px;
 }
 .nav-item:active {
   transform: scale(0.96);
 }
+.nav-item__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  transition: background var(--ease);
+}
 .nav-item__label {
-  font-size: var(--fs-9_5);
+  font-size: var(--fs-10);
   font-weight: 600;
   white-space: nowrap;
 }
+.nav-item:hover:not(.nav-item--active) {
+  color: var(--text-dim);
+}
 .nav-item--active {
   color: var(--accent-strong);
-  opacity: 1;
 }
-.nav-item--active svg {
-  filter: drop-shadow(0 0 7px rgba(124, 92, 255, 0.9));
+.nav-item--active .nav-item__icon {
+  background: rgba(124, 92, 255, 0.2);
+}
+.nav-item--active .nav-item__label {
+  font-weight: 800;
 }
