@@ -330,19 +330,16 @@ function reviewItem(
                 },
                 { variant: 'ghost', className: 'act act--goto' },
               ),
+              button([ico('close', 16), 'بستن'], () => toggle.click(), { variant: 'ghost', className: 'act act--close' }),
             ),
           );
           rendered = true;
         }
-        if (opening) {
-          body.removeAttribute('hidden');
-        } else {
-          body.setAttribute('hidden', '');
-          // keep the question in view once the answer collapses
-          item.scrollIntoView?.({ block: 'nearest' });
-        }
+        body.toggleAttribute('hidden', !opening);
         toggle.setAttribute('aria-expanded', String(opening));
         item.classList.toggle('review-item--open', opening);
+        // after the class change: the question's line-clamp resizes the head, so scrolling earlier lands off
+        if (!opening) item.scrollIntoView?.({ block: 'nearest' });
       },
     },
     h('span', { className: 'review-item__cat', attrs: { 'aria-hidden': 'true' } }, catIcon(cat.icon, 18)),

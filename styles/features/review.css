@@ -116,6 +116,9 @@
 .review-item__actions .act {
   min-height: 42px;
 }
+.review-item__actions .act--close {
+  grid-column: 1 / -1;
+}
 .act--remove {
   color: var(--danger);
 }
