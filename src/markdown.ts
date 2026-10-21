@@ -25,6 +25,8 @@
  * code snippets stay readable inside the RTL document.
  * ============================================================ */
 
+import { highlightToNodes } from './lib/highlight.js';
+
 declare const marked: {
   parse(src: string, options?: { gfm?: boolean; breaks?: boolean; async?: false }): string;
 };
@@ -110,6 +112,12 @@ function sanitizeInto(source: Node, target: Node, doc: Document): void {
     }
 
     sanitizeInto(el, clean, doc);
+
+    if (tag === 'code' && el.parentElement?.tagName.toLowerCase() === 'pre') {
+      // fenced block: replace plain text with colour-coded spans (text nodes + <span class> only)
+      const nodes = highlightToNodes(clean.textContent ?? '', clean.dataset['lang'] ?? '');
+      clean.replaceChildren(...nodes);
+    }
 
     if (tag === 'pre') {
       // CRITICAL RTL EXCEPTION — LTR container for code blocks.
