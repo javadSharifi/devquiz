@@ -119,7 +119,14 @@ function renderWebIndex() {
     <meta charset="utf-8" />
     <meta name="color-scheme" content="light dark" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>دِوکوئیز — وب</title>
+    <title>سوالات مصاحبه React و Next.js به فارسی — دِوکوئیز</title>
+    <meta name="description" content="بیش از ۱۷۰ سوال مصاحبه React (ری‌اکت)، ۱۵۰ سوال Next.js و ۱۴۰ سوال جاوا اسکریپت با پاسخ کامل فارسی. تمرین رایگان با فلش‌کارت؛ از Junior تا Senior." />
+    <link rel="canonical" href="https://javadsharifi.github.io/devquiz/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fa_IR" />
+    <meta property="og:title" content="سوالات مصاحبه React و Next.js به فارسی — دِوکوئیز" />
+    <meta property="og:description" content="تمرین بازی‌وار سوالات مصاحبه ری‌اکت، Next.js و جاوا اسکریپت با پاسخ کامل فارسی." />
+    <meta property="og:url" content="https://javadsharifi.github.io/devquiz/" />
     <link rel="icon" type="image/png" sizes="16x16" href="./assets/icons/icon16.png" />
     <link rel="icon" type="image/png" sizes="48x48" href="./assets/icons/icon48.png" />
     <link rel="apple-touch-icon" href="./assets/icons/icon128.png" />
